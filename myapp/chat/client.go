@@ -76,6 +76,8 @@ type Client struct {
 	// The websocket connection.
 	conn *websocket.Conn
 
+	redis_conn *redis.Client
+
 	// Buffered channel of outbound messages.
 	send chan []byte
 }
@@ -121,7 +123,7 @@ func (c *Client) readPump() {
 
 		//存入redis
 		m := RedisMsg{c.roomId, float64(time.Now().UnixNano()), message}
-		m.zsetMessage() //以毫秒作為key
+		c.zsetMessage(m) //以毫秒作為key
 		c.hub.broadcast <- message
 	}
 }
@@ -152,15 +154,6 @@ func (c *Client) writePump() {
 				return
 			}
 			w.Write(message)
-
-			// 這裡就單純為寫一條訊息出去 判斷是不是重連就交給hub 也從那邊拿redis的資料然後傳過來
-			// 或是在Client多寫一個chan 然後多加個case + fallthough來運用
-			// Add queued chat messages to the current websocket message.
-			// n := len(c.send)
-			// for i := 0; i < n; i++ {
-			// 	w.Write(newline)
-			// 	w.Write(<-c.send)
-			// }
 
 			if err := w.Close(); err != nil {
 				return
@@ -195,7 +188,7 @@ func serveWs(hub *Hub, ctx *gin.Context) {
 		roomType = "normal"
 	}
 
-	client := &Client{id: username, roomId: room, roomType: roomType, hub: hub, conn: conn, send: make(chan []byte, 256)}
+	client := &Client{id: username, roomId: room, roomType: roomType, hub: hub, redis_conn: GetRedisClient(), conn: conn, send: make(chan []byte, 256)}
 	client.hub.register <- client
 	client.hub.loadmsg <- client
 
@@ -205,8 +198,8 @@ func serveWs(hub *Hub, ctx *gin.Context) {
 	go client.readPump()
 }
 
-func (m RedisMsg) zsetMessage() {
-	rdb := GetRedisClient()
+func (c *Client) zsetMessage(m RedisMsg) {
+	rdb := c.redis_conn
 
 	msg := redis.Z{
 		Score:  m.Id,
@@ -224,8 +217,8 @@ func (m RedisMsg) zsetMessage() {
 	}
 }
 
-func zrangeMessage(id string, len int64) []redis.Z {
-	rdb := GetRedisClient()
+func (c *Client) zrangeMessage(id string, len int64) []redis.Z {
+	rdb := c.redis_conn
 
 	data, err := rdb.ZRangeWithScores(id, 0, len).Result()
 	if err != nil {

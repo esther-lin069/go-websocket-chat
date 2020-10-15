@@ -112,6 +112,7 @@ func (h *Hub) run() {
 					cleave := client.id //保留id以用做系統提示
 					delete(conns, client)
 					close(client.send)
+					client.redis_conn.Close()
 
 					/*聊天室若為空，則刪除該聊天室*/
 					if len(conns) == 0 {
@@ -172,7 +173,7 @@ func (h *Hub) run() {
 
 		case client := <-h.loadmsg:
 			user_room := client.roomId
-			data := zrangeMessage(user_room, zrange)
+			data := client.zrangeMessage(user_room, zrange)
 			/*印出歷史訊息*/
 			for k := range data {
 				msg := data[k].Member.(string)
