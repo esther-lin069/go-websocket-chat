@@ -1,0 +1,44 @@
+version: '3'
+services:
+    golang:
+        image: goenv
+        build: ./go
+        container_name: goapp
+        ports:
+            - "8080:8080"
+        volumes: 
+            - ./myapp:/go/src
+        depends_on:
+            - mysql
+            - redis
+        tty: true
+    mysql:
+        container_name: mysql
+        image: mysql:8.0.21
+        volumes: 
+            - ./mysql:/var/lib/mysql
+        environment:
+            MYSQL_ROOT_PASSWORD: root
+    redis:
+        container_name: redis
+        hostname: redis
+        image: redis:6.0.8-alpine
+    redis-commander:
+        container_name: redis-commander
+        hostname: redis-commander
+        image: rediscommander/redis-commander:latest
+        restart: always
+        environment:
+            - REDIS_HOSTS=local:redis:6379
+        ports:
+            - "8081:8081"
+    phpmyadmin:
+        depends_on:
+            - mysql
+        image: phpmyadmin/phpmyadmin
+        container_name: phpmyadmin
+        restart: always
+        ports:
+            - "8082:80"
+        environment:
+            PMA_HOST: mysql

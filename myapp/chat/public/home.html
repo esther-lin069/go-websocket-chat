@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Chat Example</title>
+    <link rel="shortcut icon" href="#" />
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://pro.fontawesome.com/releases/v5.10.0/css/all.css" integrity="sha384-AYmEC3Yw5cVb3ZcuHtOA93w35dYTsvhLPVnYs9eStHfGJvOvKxVfELGroGkvsg+p" crossorigin="anonymous"/>
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
+    <link href='https://cdnjs.cloudflare.com/ajax/libs/MaterialDesign-Webfont/3.6.95/css/materialdesignicons.css'>
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+
+    <script src="https://code.jquery.com/jquery-2.2.4.min.js"
+        integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44=" crossorigin="anonymous"></script>
+    <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+    <script type="text/javascript">
+
+        function goRoom(btn) {
+            var str = location.search
+            str = replaceQueryParam('room', $(btn).val(), str)
+            str = replaceQueryParam('private', "false", str)
+            window.location.href = location.protocol + "/" + str; //轉址可能沒寫很好要再修改
+        }
+        function replaceQueryParam(param, newval, search) {
+            var regex = new RegExp("([?;&])" + param + "[^&;]*[;&]?");
+            var query = search.replace(regex, "$1").replace(/&$/, '');
+
+            return (query.length > 2 ? query + "&" : "?") + (newval ? param + "=" + newval : '');
+        }
+
+        function makePrivateRoom(a){
+            var pusers = [$("#my-id").text(),$(a).data("id")].sort()
+            $.ajax({
+                type: 'POST',
+                url: location.protocol + "/privateroom",
+                data: {"user1":pusers[0],"user2": pusers[1]},
+                success: function(e){
+                    e = e.trim()
+                    str = replaceQueryParam('room', e, location.search)
+                    str = replaceQueryParam('private', "true", str)
+                    window.location.href = location.protocol+ "/"+str
+                }
+            })
+        }
+
+        window.onload = function () {
+            var conn;
+            var msg = document.getElementById("msg");
+            var log = document.getElementById("log");
+
+            //取得聊天室ＩＤ	
+            var url = new URL(location.href);
+            $("#room-id").text(url.searchParams.get('room'))
+            var chatRoom = $("#room-id").text()
+
+            //取得使用者ＩＤ
+            $("#my-id").text(url.searchParams.get('user'))
+            var user = $("#my-id").text()
+
+            //將聊天訊息放入聊天區塊
+            function appendLog(item) {
+                var doScroll = log.scrollTop > log.scrollHeight - log.clientHeight - 1;
+                //log.appendChild(item);
+                $("#log").append(item)
+                if (doScroll) {
+                    log.scrollTop = log.scrollHeight - log.clientHeight;
+                }
+            }
+
+            //傳送輸入框訊息to ws
+            document.getElementById("form").onsubmit = function () {
+                var type = "N"
+                if (!conn) {
+                    return false;
+                }
+                if (!msg.value) {
+                    return false;
+                }
+
+                if ($("#msg-type").val() == "broadcast") {
+                    type = "A"
+                }
+                jstr = JSON.stringify({ sender: user, roomId:chatRoom, type: type, content: msg.value, time:Date.now() });
+                conn.send(jstr)
+                msg.value = "";
+                return false;
+            };
+
+            //WS連線：接收廣播訊息
+            if (window["WebSocket"]) {
+                conn = new WebSocket("ws://" + document.location.host + "/ws" + location.search);
+                conn.onclose = function (evt) {
+                    var item = document.createElement("div");
+                    item.innerHTML = "<b>Connection closed.</b>";
+                    appendLog(item);
+                };
+                conn.onmessage = function (evt) {
+                    var messages = evt.data.split('\n');
+
+
+                    for (var i = 0; i < messages.length; i++) {
+                        chat = JSON.parse(messages[i]);
+                        chatTime = new Date(chat.time).toLocaleString('zh-TW');
+                        //判斷是否為系統訊息
+                        if (chat.sender == "SYS") {
+
+                            //系統hint 使用者名單
+                            if (chat.type == "H") {
+                                $("#member-list").empty()
+                                info = JSON.parse(chat.content)
+
+                                if (chatRoom != info.room_info) {
+                                    alert("聊天室位置出錯!" + chatRoom + info.room_info);
+                                } //聊天室名稱
+                                var members = info.user_info.split(",")
+                                members.forEach(element => {
+                                    if (element == user) {  //是自己的話就不用列出
+                                        return
+                                    }
+                                    //在線使用者名單
+                                    var box = $(`<dt>
+                                            <div class="card">
+                                                <div class="box">
+                                                <span style="color:#00798F;margin-right:8px;">
+                                                    <i class="fa fa-user"></i>
+                                                </span>
+                                                <a onclick="makePrivateRoom(this)" class="pchat-btn" role="button" href="#" data-id="${element}">
+                                                    <i class="fa fa-comment-dots"></i></a>
+                                                <span class="box-text">${element}</span> 
+                                                </div>
+                                            </div>
+                                        </dt>`)
+
+                                    $("#member-list").append(box)
+
+                                });
+                            }
+                            //系統info
+                            else {
+                                $("#rooms dl").empty()  //清空聊天室列表
+                                $("#main-room").html("大廳") //清空大廳人數
+                                info = JSON.parse(chat.content)
+                                rooms = JSON.parse(info.room_info)
+                                users = info.user_info.split(',')
+                                console.log(users)
+                                console.log(rooms)
+
+                                for (var room in rooms) {
+                                    var roomTitle = room + "聊天室(" + rooms[room] + ")";
+                                    if (room == chatRoom) {
+                                        roomTitle = "・" + roomTitle;
+                                    }
+                                    if (room == "main") {     //是大廳就不用列出
+                                        $("#main-room").html("大廳(" + rooms[room] + ")")
+                                        continue
+                                    }
+                                    var roomBox = $(`<dt>
+                                                <button onclick="goRoom(this)" class="div-ell mh20 room-box-text room-btn" value="${room}">${roomTitle}</button>
+                                            </dt>`);
+                                    $("#rooms dl").append(roomBox)
+                                    //這裡有機會可改進為不同class
+
+                                }
+
+                            }
+                            var item = $(`<div class="system-text"><label>${info.text}</label></div>`)
+                        }
+                        else {
+
+                            if (chat.type == "A") {
+                                var bro_content = chat.content;
+                                var item = $(`<div class="chat-text">
+                                <label class="sm-text"><span style="font-weight: 1000;">${chat.sender}</span> 於 ${chatTime} 廣播</lable><br>
+                                <label class="bro-text">&nbsp;&nbsp;${bro_content}</label>
+                            </div>`)
+                            }
+                            //一般的頻道消息
+                            else {
+                                var item = $(`<div class="chat-text">
+                                    <label class="sm-text"><span style="font-weight: 1000;">${chat.sender}</span> 於 ${chatTime}</lable><br>
+                                    <label class="md-text">&nbsp;&nbsp;${chat.content}</label>
+                                </div>`)
+                            }
+                        }
+                        //打印訊息            
+                        appendLog(item);
+                    }
+
+
+                };
+            } else {
+                var item = document.createElement("div");
+                item.innerHTML = "<b>Your browser does not support WebSockets.</b>";
+                appendLog(item);
+            }
+
+            //建立聊天室
+            $("#newRoom").click(function () {
+                swal({
+                    title: "建立/前往 聊天室",
+                    text: "聊天室id:",
+                    content: "input",
+                    buttons: {
+                        cancel: true,
+                        confirm: true,
+                    },
+                }).then(function (inputValue) {
+                    if (inputValue === null) return false;
+                    if (inputValue === "") {
+                        sweetAlert("哎呦……", "請輸入聊天室id", "error");
+                        return false
+                    }
+                    if (inputValue.length > 30) {
+                        sweetAlert("太…長……啦", "聊天室id為30字元內", "warning");
+                        return false
+                    }
+
+                    window.location.href = location.protocol + "/?user=" + user + "&room=" + inputValue + "&private=false"; //轉址可能沒寫很好要再修改  
+                });
+            })
+
+            // $(".box a").click(function(){
+            //     console.log($(this).data("id"))
+            // })
+
+        };
+    </script>
+
+</head>
+
+<body>
+
+    <div id="room">
+        <div class="room-title div-ell">
+            <h1 class="title-text" id="room-id"></h1>
+        </div>
+
+        <div id="rooms">
+            <h5 class="title-text">聊天室列表
+                <button id="newRoom">
+                    <svg class="svg-icon" viewBox="0 0 20 20">
+                        <path
+                            d="M14.613,10c0,0.23-0.188,0.419-0.419,0.419H10.42v3.774c0,0.23-0.189,0.42-0.42,0.42s-0.419-0.189-0.419-0.42v-3.774H5.806c-0.23,0-0.419-0.189-0.419-0.419s0.189-0.419,0.419-0.419h3.775V5.806c0-0.23,0.189-0.419,0.419-0.419s0.42,0.189,0.42,0.419v3.775h3.774C14.425,9.581,14.613,9.77,14.613,10 M17.969,10c0,4.401-3.567,7.969-7.969,7.969c-4.402,0-7.969-3.567-7.969-7.969c0-4.402,3.567-7.969,7.969-7.969C14.401,2.031,17.969,5.598,17.969,10 M17.13,10c0-3.932-3.198-7.13-7.13-7.13S2.87,6.068,2.87,10c0,3.933,3.198,7.13,7.13,7.13S17.13,13.933,17.13,10">
+                        </path>
+                    </svg>
+                </button>
+            </h5>
+            <button id="main-room" onclick="goRoom(this)" class="mh20 room-box-text room-btn" value="main">大廳</button>
+            <dl>
+                <!-- 聊天室列表 -->
+            </dl>
+        </div>
+    </div>
+    <div id="chat">
+        <div id="log"></div>
+        <div id="form">
+            <form class="form-inline">
+                <select class="custom-select" id="msg-type">
+                    <option value="default">一般</option>
+                    <option value="broadcast">廣播</option>
+                </select>
+                <input class="w3-input w3-border w3-round" type="text" id="msg" autofocus />
+                <button type="submit">Send</button>
+            </form>
+        </div>
+
+    </div>
+    <div id="member">
+        <h5 class="title-text">在線列表</h5>
+        <dl>
+            <dt>
+                <div class="card">
+                    <div class="box">
+                        <span style="color:rgb(230, 215, 102);margin-right:8px;">
+                            <i class="fa fa-user"></i>
+                        </span>
+                        <span id="my-id" class="box-text"></span>
+                    </div>
+                </div>
+            </dt>
+        </dl>
+        <dl id="member-list">
+            <!-- 該聊天室內的使用者清單 -->
+        </dl>
+
+    </div>
+
+
+
+
+</body>
+<style>
+    html {
+        overflow: hidden;
+    }
+
+    body {
+        overflow: hidden;
+        padding: 0;
+        margin: 0;
+        width: 100%;
+        height: 100%;
+        background: #91BFC7;
+        font-family: 'Noto Sans TC', sans-serif;
+    }
+
+    /* sprite */
+    .room-title {
+        padding-right: 1px;
+        max-height: 15vh;
+        width: 100%;
+    }
+
+    .chat-text{
+        margin-bottom: 5px;
+    }
+
+    .card {
+        margin: 5px auto;
+        width: 90%;
+        padding: 5px 5px 5px 12px;
+        background-color: #A3D0D9;
+        border-radius: 0.4em;
+    }
+
+    .pchat-btn i {
+        color: #FFF;
+        text-align: right;
+    }
+
+    .room-btn {
+        width: 100%;
+        margin: 1px auto;
+        height: 60px;
+        padding: 5px 5px 5px 12px;
+        background-color: #00798F;
+        border: 0;
+    }
+
+    .room-btn-h {
+        width: 100%;
+        margin: 1px auto;
+        height: 60px;
+        padding: 5px 5px 5px 12px;
+        background-color: #159ab1;
+        border: 0;
+    }
+
+    #newRoom {
+        background-color: transparent;
+        height: 2em;
+        width: 2em;
+        border: 0;
+        padding: 0;
+        position: relative;
+        top: 10px;
+    }
+
+    #newRoom:hover {
+        background-color: #91BFC7;
+        top: 12px;
+        cursor: pointer;
+    }
+
+    /* hover */
+    .mh20 {
+        color: rgba(255, 255, 255, 1);
+        transition: all 0.5s;
+        position: relative;
+        border: 1px solid rgba(255, 255, 255, 0.5);
+        overflow: hidden;
+    }
+
+    .mh20:before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 1;
+        transition: all 0.5s;
+        opacity: 1;
+        transform: translate(-105%, 0);
+        border-right-width: 1px;
+        border-right-style: solid;
+        border-right-color: rgba(0, 0, 0, 1);
+        background-color: rgba(0, 0, 0, 0.25);
+    }
+
+    .mh20:hover:before {
+        opacity: 0;
+        transform: translate(0, 0);
+    }
+
+    /* -----
+SVG Icons - svgicons.sparkk.fr
+----- */
+
+    .svg-icon {
+        width: 2em;
+        height: 2em;
+    }
+
+    .svg-icon path,
+    .svg-icon polygon,
+    .svg-icon rect {
+        fill: #00798F;
+    }
+
+    .svg-icon circle {
+        stroke: #00798F;
+        stroke-width: 1;
+    }
+
+    /* area */
+    #rooms {
+        overflow: auto;
+        height: 68vh;
+    }
+
+    #chat {
+        height: 100vh;
+        width: 70%;
+        margin: 0px auto;
+    }
+
+    #room {
+        height: 100vh;
+        width: 15%;
+        float: left;
+    }
+
+    #member {
+        overflow: auto;
+        height: 100vh;
+        width: 15%;
+        position: absolute;
+        top: 0;
+        right: 0px;
+    }
+
+    #log {
+        overflow: auto;
+        background: white;
+        height: 80vh;
+        margin-top: 1em;
+        padding: 0.5em 2em 0.5em 2em;
+    }
+
+    /* form */
+
+    .form-inline {
+        display: flex;
+        flex-flow: row wrap;
+        align-items: center;
+    }
+
+    .form-inline input {
+        width: 80%;
+        vertical-align: middle;
+        margin: 5px 10px 5px 0;
+        padding: 10px;
+        background-color: #fff;
+        border: 1px solid #ddd;
+    }
+
+    .form-inline button {
+        padding: 10px 20px;
+        background-color: #00798F;
+        border: 1px solid #ddd;
+        color: white;
+        cursor: pointer;
+    }
+
+    .form-inline button:hover {
+        background-color: #91BFC7;
+    }
+
+    #msg-type {
+        height: 80px;
+        width: 8%;
+    }
+
+    .div-ell {
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    /* text */
+    .title-text {
+        text-align: center;
+        color: #413636;
+    }
+
+    .box-text {
+        color: #413636;
+        font-size: 14pt;
+        font-weight: 600;
+    }
+
+    .room-box-text {
+        color: white;
+        font-size: 14pt;
+    }
+
+    .sm-text {
+        font-size: small;
+        color: dimgray;
+    }
+
+    .md-text {
+        font-size: 14pt;
+        color: #000;
+    }
+
+    .bro-text {
+        font-size: 12pt;
+        color: goldenrod;
+    }
+
+    .system-text {
+        font-size: small;
+        color: firebrick;
+        position: relative;
+    }
+
+    /* select */
+
+    /* The container must be positioned relative: */
+    .custom-select {
+        position: relative;
+        font-family: Arial;
+    }
+
+    .custom-select select {
+        display: none;
+        /*hide original SELECT element: */
+    }
+
+    .select-selected {
+        background-color: DodgerBlue;
+    }
+
+    /* Style the arrow inside the select element: */
+    .select-selected:after {
+        position: absolute;
+        content: "";
+        top: 14px;
+        right: 10px;
+        width: 0;
+        height: 0;
+        border: 6px solid transparent;
+        border-color: #fff transparent transparent transparent;
+    }
+
+    /* Point the arrow upwards when the select box is open (active): */
+    .select-selected.select-arrow-active:after {
+        border-color: transparent transparent #fff transparent;
+        top: 7px;
+    }
+
+    /* style the items (options), including the selected item: */
+    .select-items div,
+    .select-selected {
+        color: #ffffff;
+        padding: 8px 16px;
+        border: 1px solid transparent;
+        border-color: transparent transparent rgba(0, 0, 0, 0.1) transparent;
+        cursor: pointer;
+    }
+
+    /* Style items (options): */
+    .select-items {
+        position: absolute;
+        background-color: DodgerBlue;
+        top: 100%;
+        left: 0;
+        right: 0;
+        z-index: 99;
+    }
+
+    /* Hide the items when the select box is closed: */
+    .select-hide {
+        display: none;
+    }
+
+    .select-items div:hover,
+    .same-as-selected {
+        background-color: rgba(0, 0, 0, 0.1);
+    }
+</style>
+
+</html>
