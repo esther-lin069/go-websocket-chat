@@ -172,7 +172,7 @@ func (h *Hub) run() {
 
 		case client := <-h.loadmsg:
 			user_room := client.roomId
-			data := zrangeMessage(user_room, 100)
+			data := zrangeMessage(user_room, zrange)
 			/*印出歷史訊息*/
 			for k := range data {
 				msg := data[k].Member.(string)
@@ -184,7 +184,7 @@ func (h *Hub) run() {
 }
 
 /*獲取聊天室列表和使用者名單*/
-func (h *Hub) makeInfo() []byte {
+func (h *Hub) makeInfo() [2]string {
 	chatrooms := make([]string, 0, len(h.rooms))
 	var chatusers []string
 	for room, users := range h.rooms {
@@ -198,9 +198,12 @@ func (h *Hub) makeInfo() []byte {
 	data, _ := json.Marshal(&SysMsg{Text: "", RoomInfo: "{" + strings.Join(chatrooms, ",") + "}", UserInfo: strings.Join(chatusers, ",")})
 	message, _ := json.Marshal(&Message{Sender: "SYS", RoomId: "", Type: "A", Content: string(data), Time: getUTCTime()})
 
+	var info [2]string
+	info[0] = "{" + strings.Join(chatrooms, ",") + "}"
+	info[1] = strings.Join(chatusers, ",")
 	// /*發送系統資訊至聊天室*/
 	h.sys(message)
-	return message
+	return info
 }
 
 /*全頻道廣播*/

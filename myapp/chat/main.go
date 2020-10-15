@@ -75,7 +75,8 @@ func main() {
 	router.GET("/info", func(ctx *gin.Context) {
 		data := hub.makeInfo()
 		ctx.JSON(200, gin.H{
-			"info": string(data),
+			"Rooms": data[0],
+			"Users": data[1],
 		})
 	})
 

@@ -39,6 +39,9 @@ var upgrader = websocket.Upgrader{
 	WriteBufferSize: 1024,
 }
 
+//讓redis存的長度保持在 zrange 筆
+var zrange int64 = 100
+
 /*
 N/normal:普通聊天室訊息
 A/all:全域廣播訊息
@@ -192,7 +195,6 @@ func serveWs(hub *Hub, ctx *gin.Context) {
 		roomType = "normal"
 	}
 
-	//client := &Client{id: uuid.Must(uuid.NewRandom()).String(), hub: hub, conn: conn, send: make(chan []byte, 256)}
 	client := &Client{id: username, roomId: room, roomType: roomType, hub: hub, conn: conn, send: make(chan []byte, 256)}
 	client.hub.register <- client
 	client.hub.loadmsg <- client
@@ -211,8 +213,6 @@ func (m RedisMsg) zsetMessage() {
 		Member: m.Value,
 	}
 
-	//讓存的長度保持在 zrange 筆
-	var zrange int64 = 100
 	length := rdb.ZCard(m.User).Val()
 	if length >= zrange {
 		rdb.ZRemRangeByRank(m.User, 0, 1)
