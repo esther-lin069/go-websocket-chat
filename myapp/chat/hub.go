@@ -148,7 +148,7 @@ func (h *Hub) run() {
 			var msg Message
 			err := json.Unmarshal(message, &msg) //轉換出使用者發的訊息內容
 			if err != nil {
-				message = []byte("訊息轉換錯誤")
+				fmt.Println(message)
 			}
 
 			/*如果是廣播訊息，則發送至全頻道後跳轉回迴圈頂端*/
@@ -172,7 +172,7 @@ func (h *Hub) run() {
 
 		case client := <-h.loadmsg:
 			user_room := client.roomId
-			data := zrangeMessage(user_room, 5)
+			data := zrangeMessage(user_room, 100)
 			/*印出歷史訊息*/
 			for k := range data {
 				msg := data[k].Member.(string)

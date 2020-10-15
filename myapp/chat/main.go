@@ -5,93 +5,80 @@
 package main
 
 import (
-	"flag"
-	"fmt"
-	"html/template"
-	"log"
 	"net/http"
 	"strings"
+
+	"github.com/gin-gonic/gin"
 )
 
-var addr = flag.String("addr", ":8080", "http service address")
-
-func serveHome(w http.ResponseWriter, r *http.Request) {
-	log.Println(r.URL)
-	if r.URL.Path != "/" {
-		http.Error(w, "Not found", http.StatusNotFound)
-		return
+func serveHome(ctx *gin.Context) {
+	//log.Println(r.URL)
+	if ctx.Query("user") == "" {
+		ctx.Redirect(http.StatusMovedPermanently, "/login") //在這裡加私訊驗證
 	}
-	if r.URL.Query().Get("user") == "" {
-		http.Redirect(w, r, "/login", http.StatusSeeOther) //在這裡加私訊驗證
-	}
-	if r.URL.Query().Get("private") == "true" {
-		user := r.URL.Query().Get("user")
-		pusers := strings.Split(r.URL.Query().Get("room"), "-")
+	if ctx.Query("private") == "true" {
+		user := ctx.Query("user")
+		pusers := strings.Split(ctx.Query("room"), "-")
 		if len(pusers) != 2 {
-			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+			ctx.JSON(400, gin.H{
+				"error": "missing RoomID",
+			})
 			return
 		}
 		if !(user == pusers[0] || user == pusers[1]) {
-			http.Error(w, "Not found", http.StatusNotFound)
+			ctx.JSON(400, gin.H{
+				"error": "wrong Private RoomID",
+			})
 			return
 		}
 
 	}
-	if r.Method != "GET" {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-		return
-	}
-	http.ServeFile(w, r, "public/home.html")
+	ctx.HTML(http.StatusOK, "home.html", nil)
 }
 
-func login(w http.ResponseWriter, r *http.Request) {
-	err := r.ParseForm()
-	if err != nil {
-		fmt.Fprint(w, "Form value error")
-		return
-	}
+func login(ctx *gin.Context) {
+	username := strings.Trim(ctx.Request.FormValue("username"), " ")
+	ctx.Redirect(http.StatusMovedPermanently, "/?user="+username+"&room=main&private=false")
 
-	fmt.Println("method:", r.Method)
-	if r.Method == "GET" {
-		t, _ := template.ParseFiles("login.gtpl")
-		log.Println(t.Execute(w, nil))
-	} else {
-		// 在這邊放驗證
-		user := strings.Trim(r.Form["username"][0], " ")
-		http.Redirect(w, r, "/?user="+user+"&room=main&private=false", http.StatusSeeOther) //進入聊天室大廳
-	}
 }
 
-func makePrivateRoom(w http.ResponseWriter, r *http.Request) {
-	if r.Method == "POST" {
-		user := r.FormValue("user")
-		roomName := r.FormValue("roomName")
-		http.Redirect(w, r, "/?user="+user+"&room="+roomName+"&private=ture", http.StatusFound) //進入聊天室
+func makePrivateRoom(ctx *gin.Context) {
 
-	} else {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-		return
-	}
+	user := ctx.Request.FormValue("user")
+	roomName := ctx.Request.FormValue("roomName")
+	ctx.Redirect(http.StatusMovedPermanently, "/?user="+user+"&room="+roomName+"&private=ture") //進入聊天室
 
 }
 
 func main() {
-	flag.Parse()
 	hub := newHub()
-	//rdb := GetRedisClient()
 	go hub.run()
-	http.HandleFunc("/login", login)
-	http.HandleFunc("/", serveHome)
-	http.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
-		serveWs(hub, w, r)
+
+	// ROUTER
+	router := gin.Default()
+	router.LoadHTMLGlob("public/*")
+
+	router.GET("/login", func(ctx *gin.Context) {
+		ctx.HTML(http.StatusOK, "login.html", nil)
 	})
-	http.HandleFunc("/info", func(w http.ResponseWriter, r *http.Request) {
+
+	router.POST("/login", login)
+
+	router.GET("/", serveHome)
+
+	router.POST("/privateroom", makePrivateRoom)
+
+	router.GET("/ws", func(ctx *gin.Context) {
+		serveWs(hub, ctx)
+	})
+
+	router.GET("/info", func(ctx *gin.Context) {
 		data := hub.makeInfo()
-		fmt.Fprint(w, string(data))
+		ctx.JSON(200, gin.H{
+			"info": string(data),
+		})
 	})
-	http.HandleFunc("/privateroom", makePrivateRoom)
-	err := http.ListenAndServe(*addr, nil)
-	if err != nil {
-		log.Fatal("ListenAndServe: ", err)
-	}
+
+	router.Run(":8080")
+
 }

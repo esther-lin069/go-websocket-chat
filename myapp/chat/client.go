@@ -7,9 +7,9 @@ package main
 import (
 	"fmt"
 	"log"
-	"net/http"
 	"time"
 
+	"github.com/gin-gonic/gin"
 	"github.com/go-redis/redis"
 
 	"github.com/gorilla/websocket"
@@ -172,37 +172,28 @@ func (c *Client) writePump() {
 }
 
 // serveWs handles websocket requests from the peer.
-func serveWs(hub *Hub, w http.ResponseWriter, r *http.Request) {
-	conn, err := upgrader.Upgrade(w, r, nil)
+func serveWs(hub *Hub, ctx *gin.Context) {
+	conn, err := upgrader.Upgrade(ctx.Writer, ctx.Request, nil)
 	if err != nil {
 		log.Println(err)
 		return
 	}
-	username, ok := r.URL.Query()["user"]
-	if !ok || len(username[0]) < 1 {
-		fmt.Fprint(w, "Url Param 'user' is missing")
-		return
-	}
-	room, ok := r.URL.Query()["room"]
-	if !ok || len(room[0]) < 1 {
-		fmt.Fprint(w, "Url Param 'room' is missing")
-		return
-	}
-	fmt.Println("user:" + username[0] + "/ room:" + room[0] + " .registered")
+	username := ctx.Query("user")
+	room := ctx.Query("room")
 
-	private, ok := r.URL.Query()["private"]
+	fmt.Println("user:" + username + "/ room:" + room + " .registered")
+
+	private := ctx.Query("private")
+
 	var roomType string
-	if !ok {
-		return
-	}
-	if private[0] == "true" {
+	if private == "true" {
 		roomType = "private"
 	} else {
 		roomType = "normal"
 	}
 
 	//client := &Client{id: uuid.Must(uuid.NewRandom()).String(), hub: hub, conn: conn, send: make(chan []byte, 256)}
-	client := &Client{id: username[0], roomId: room[0], roomType: roomType, hub: hub, conn: conn, send: make(chan []byte, 256)}
+	client := &Client{id: username, roomId: room, roomType: roomType, hub: hub, conn: conn, send: make(chan []byte, 256)}
 	client.hub.register <- client
 	client.hub.loadmsg <- client
 
@@ -210,24 +201,6 @@ func serveWs(hub *Hub, w http.ResponseWriter, r *http.Request) {
 	// new goroutines.
 	go client.writePump()
 	go client.readPump()
-}
-
-func hsetMessage(m RedisMsg) {
-	rdb := redis.NewClient(&redis.Options{
-		Addr:     "localhost:6379",
-		Password: "", // no password set
-		DB:       0,  // use default DB
-	})
-
-	length, _ := rdb.HLen(m.User).Result()
-	if length > 5 {
-		rdb.Del(m.User)
-	}
-
-	err := rdb.Do("hset", m.User, m.Id, m.Value).Err()
-	if err != nil {
-		panic(err)
-	}
 }
 
 func (m RedisMsg) zsetMessage() {
@@ -246,7 +219,6 @@ func (m RedisMsg) zsetMessage() {
 	}
 
 	err := rdb.ZAdd(m.User, msg).Err()
-	//err := rdb.Do("zadd", m.Id, m.Value)
 	if err != nil {
 		panic(err)
 	}
@@ -255,7 +227,10 @@ func (m RedisMsg) zsetMessage() {
 func zrangeMessage(id string, len int64) []redis.Z {
 	rdb := GetRedisClient()
 
-	data, _ := rdb.ZRangeWithScores(id, 0, len).Result()
+	data, err := rdb.ZRangeWithScores(id, 0, len).Result()
+	if err != nil {
+		panic(err)
+	}
 	return data
 
 }

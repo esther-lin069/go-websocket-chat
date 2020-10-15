@@ -1,5 +1,8 @@
 {
     "go.inferGopath": false,
+    "git.ignoreLimitWarning": true,
     "go.lintTool": "golangci-lint",
-    "go.lintFlags": [],
+    "go.lintFlags": [
+        "--fast"
+    ],
 }
