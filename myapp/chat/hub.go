@@ -97,9 +97,7 @@ func (h *Hub) run() {
 
 			/*發送至該聊天室*/
 			for con := range conns {
-				select {
-				case con.send <- message:
-				}
+				con.send <- message
 			}
 
 		/*使用者離線或切換聊天室
@@ -138,9 +136,7 @@ func (h *Hub) run() {
 
 					/*發送至該聊天室*/
 					for con := range conns {
-						select {
-						case con.send <- message:
-						}
+						con.send <- message
 					}
 				}
 			}
@@ -150,7 +146,10 @@ func (h *Hub) run() {
 		 */
 		case message := <-h.broadcast:
 			var msg Message
-			json.Unmarshal(message, &msg) //轉換出使用者發的訊息內容
+			err := json.Unmarshal(message, &msg) //轉換出使用者發的訊息內容
+			if err != nil {
+				message = []byte("訊息轉換錯誤")
+			}
 
 			/*如果是廣播訊息，則發送至全頻道後跳轉回迴圈頂端*/
 			if msg.Type == "A" {
@@ -177,9 +176,7 @@ func (h *Hub) run() {
 			/*印出歷史訊息*/
 			for k := range data {
 				msg := data[k].Member.(string)
-				select {
-				case client.send <- []byte(msg):
-				}
+				client.send <- []byte(msg)
 			}
 
 		}
@@ -193,8 +190,7 @@ func (h *Hub) makeInfo() []byte {
 	for room, users := range h.rooms {
 		chatrooms = append(chatrooms, "\""+room+"\":"+strconv.Itoa(len(h.rooms[room])))
 		for user := range users {
-			var u Client
-			u = *user
+			var u Client = *user
 			chatusers = append(chatusers, u.id)
 		}
 	}

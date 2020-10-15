@@ -29,16 +29,18 @@
         }
 
         function makePrivateRoom(a){
-            var pusers = [$("#my-id").text(),$(a).data("id")].sort()
+            var user = $("#my-id").text();
+            var pusers = [user,$(a).data("id")].sort();
+            var xhr = new XMLHttpRequest();
             $.ajax({
                 type: 'POST',
                 url: location.protocol + "/privateroom",
-                data: {"user1":pusers[0],"user2": pusers[1]},
-                success: function(e){
-                    e = e.trim()
-                    str = replaceQueryParam('room', e, location.search)
-                    str = replaceQueryParam('private', "true", str)
-                    window.location.href = location.protocol+ "/"+str
+                data: {"user":user,"roomName": pusers[0] + "-" + pusers[1]},
+                xhr: function(){
+                    return xhr
+                },
+                success:function(){
+                    window.location.href = xhr.responseURL
                 }
             })
         }

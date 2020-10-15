@@ -45,25 +45,29 @@ func serveHome(w http.ResponseWriter, r *http.Request) {
 }
 
 func login(w http.ResponseWriter, r *http.Request) {
-	r.ParseForm()
+	err := r.ParseForm()
+	if err != nil {
+		fmt.Fprint(w, "Form value error")
+		return
+	}
+
 	fmt.Println("method:", r.Method)
 	if r.Method == "GET" {
 		t, _ := template.ParseFiles("login.gtpl")
 		log.Println(t.Execute(w, nil))
 	} else {
 		// 在這邊放驗證
-		user := r.Form["username"][0]
-		http.Redirect(w, r, "/?user="+strings.Trim(user, " ")+"&room=main&private=false", http.StatusSeeOther) //進入聊天室大廳
+		user := strings.Trim(r.Form["username"][0], " ")
+		http.Redirect(w, r, "/?user="+user+"&room=main&private=false", http.StatusSeeOther) //進入聊天室大廳
 	}
 }
 
 func makePrivateRoom(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "POST" {
-		user1 := r.FormValue("user1")
-		user2 := r.FormValue("user2")
+		user := r.FormValue("user")
+		roomName := r.FormValue("roomName")
+		http.Redirect(w, r, "/?user="+user+"&room="+roomName+"&private=ture", http.StatusFound) //進入聊天室
 
-		roomName := user1 + "-" + user2
-		w.Write([]byte(strings.Trim(roomName, " ")))
 	} else {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 		return
