@@ -1,7 +1,3 @@
-// Copyright 2013 The Gorilla WebSocket Authors. All rights reserved.
-// Use of this source code is governed by a BSD-style
-// license that can be found in the LICENSE file.
-
 package main
 
 import (
@@ -93,7 +89,7 @@ func (h *Hub) run() {
 			/*製作系統提示(訊息＋人員名單)*/
 			sysmsg := client.id + " 進入 " + client.roomId + " 聊天室!"
 			data, _ := json.Marshal(&SysMsg{Text: sysmsg, RoomInfo: client.roomId, UserInfo: strings.Join(roomstate, ",")})
-			message, _ := json.Marshal(&Message{Sender: "SYS", RoomId: client.roomId, Type: "H", Content: string(data), Time: getUTCTime()})
+			message, _ := json.Marshal(&Message{Sender: "SYS", RoomId: client.roomId, Type: "H", Content: string(data), Time: ""})
 
 			/*發送至該聊天室*/
 			for con := range conns {
@@ -109,10 +105,10 @@ func (h *Hub) run() {
 			conns := h.rooms[client.roomId]
 			if conns != nil {
 				if _, ok := conns[client]; ok {
-					cleave := client.id //保留id以用做系統提示
+					cleave := client.id 		//保留id以用做系統提示
 					delete(conns, client)
 					close(client.send)
-					client.redis_conn.Close()
+					client.redis_conn.Close() 	//關閉redis連線
 
 					/*聊天室若為空，則刪除該聊天室*/
 					if len(conns) == 0 {
@@ -133,7 +129,7 @@ func (h *Hub) run() {
 					/*製作系統提示(訊息＋人員名單)*/
 					sysmsg := cleave + " 離開 " + client.roomId + " 聊天室!"
 					data, _ := json.Marshal(&SysMsg{Text: sysmsg, RoomInfo: client.roomId, UserInfo: strings.Join(roomstate, ",")})
-					message, _ := json.Marshal(&Message{Sender: "SYS", RoomId: client.roomId, Type: "H", Content: string(data), Time: getUTCTime()})
+					message, _ := json.Marshal(&Message{Sender: "SYS", RoomId: client.roomId, Type: "H", Content: string(data), Time: ""})
 
 					/*發送至該聊天室*/
 					for con := range conns {
@@ -169,7 +165,7 @@ func (h *Hub) run() {
 				}
 			}
 
-		//如果是私訊 只發給該使用者
+		//?如果是私訊 只發給該使用者
 
 		case client := <-h.loadmsg:
 			user_room := client.roomId
@@ -197,12 +193,13 @@ func (h *Hub) makeInfo() [2]string {
 	}
 
 	data, _ := json.Marshal(&SysMsg{Text: "", RoomInfo: "{" + strings.Join(chatrooms, ",") + "}", UserInfo: strings.Join(chatusers, ",")})
-	message, _ := json.Marshal(&Message{Sender: "SYS", RoomId: "", Type: "A", Content: string(data), Time: getUTCTime()})
+	message, _ := json.Marshal(&Message{Sender: "SYS", RoomId: "", Type: "A", Content: string(data), Time: ""})
 
 	var info [2]string
 	info[0] = "{" + strings.Join(chatrooms, ",") + "}"
 	info[1] = strings.Join(chatusers, ",")
-	// /*發送系統資訊至聊天室*/
+
+	// 發送系統資訊至聊天室
 	h.sys(message)
 	return info
 }

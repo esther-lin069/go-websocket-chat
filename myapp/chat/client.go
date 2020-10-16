@@ -1,7 +1,3 @@
-// Copyright 2013 The Gorilla WebSocket Authors. All rights reserved.
-// Use of this source code is governed by a BSD-style
-// license that can be found in the LICENSE file.
-
 package main
 
 import (
@@ -82,19 +78,7 @@ type Client struct {
 	send chan []byte
 }
 
-func getUTCTime() string {
-	tn := time.Now()
-	local, err := time.LoadLocation("UTC")
-	if err != nil {
-		fmt.Println(err)
-	}
-	t := tn.In(local)
-	formatted := fmt.Sprintf("%d-%02d-%02dT%02d:%02d:%02d",
-		t.Year(), t.Month(), t.Day(),
-		t.Hour(), t.Minute(), t.Second())
-	return formatted
-}
-
+/*獲取Redis連線*/
 func GetRedisClient() *redis.Client {
 	return redis.NewClient(&redis.Options{
 		Addr:     "redis:6379",
@@ -103,7 +87,7 @@ func GetRedisClient() *redis.Client {
 	})
 }
 
-// readPump pumps messages from the websocket connection to the hub.
+/*讀取從ws來的訊息*/
 func (c *Client) readPump() {
 	defer func() {
 		c.hub.unregister <- c
@@ -121,18 +105,15 @@ func (c *Client) readPump() {
 			break
 		}
 
-		//存入redis
+		/*存入redis*/
 		m := RedisMsg{c.roomId, float64(time.Now().UnixNano()), message}
 		c.zsetMessage(m) //以毫秒作為key
+
 		c.hub.broadcast <- message
 	}
 }
 
-// writePump pumps messages from the hub to the websocket connection.
-//
-// A goroutine running writePump is started for each connection. The
-// application ensures that there is at most one writer to a connection by
-// executing all writes from this goroutine.
+/*將訊息寫入ws連線*/
 func (c *Client) writePump() {
 	ticker := time.NewTicker(pingPeriod)
 	defer func() {
@@ -167,7 +148,7 @@ func (c *Client) writePump() {
 	}
 }
 
-// serveWs handles websocket requests from the peer.
+/*serveWs handles websocket requests from the peer.*/
 func serveWs(hub *Hub, ctx *gin.Context) {
 	conn, err := upgrader.Upgrade(ctx.Writer, ctx.Request, nil)
 	if err != nil {
@@ -192,12 +173,12 @@ func serveWs(hub *Hub, ctx *gin.Context) {
 	client.hub.register <- client
 	client.hub.loadmsg <- client
 
-	// Allow collection of memory referenced by the caller by doing all work in
-	// new goroutines.
+	// Allow collection of memory referenced by the caller by doing all work in new goroutines
 	go client.writePump()
 	go client.readPump()
 }
 
+/*Redis存取*/
 func (c *Client) zsetMessage(m RedisMsg) {
 	rdb := c.redis_conn
 

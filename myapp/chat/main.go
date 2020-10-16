@@ -1,7 +1,3 @@
-// Copyright 2013 The Gorilla WebSocket Authors. All rights reserved.
-// Use of this source code is governed by a BSD-style
-// license that can be found in the LICENSE file.
-
 package main
 
 import (
@@ -43,10 +39,9 @@ func login(ctx *gin.Context) {
 }
 
 func makePrivateRoom(ctx *gin.Context) {
-
-	user := ctx.Request.FormValue("user")
+	username := ctx.Request.FormValue("user")
 	roomName := ctx.Request.FormValue("roomName")
-	ctx.Redirect(http.StatusMovedPermanently, "/?user="+user+"&room="+roomName+"&private=ture") //進入聊天室
+	ctx.Redirect(http.StatusMovedPermanently, "/?user="+username+"&room="+roomName+"&private=ture") //進入聊天室
 
 }
 
