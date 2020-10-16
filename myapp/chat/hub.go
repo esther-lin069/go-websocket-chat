@@ -113,13 +113,14 @@ func (h *Hub) run() {
 					/*聊天室若為空，則刪除該聊天室*/
 					if len(conns) == 0 {
 						delete(h.rooms, client.roomId)
-						h.makeInfo()
 					}
 
 					/*判斷是否為私聊*/
 					if client.roomType == "private" {
 						break FOR
 					}
+
+					h.makeInfo()
 
 					/*系統資訊：所在房間人員名單*/
 					roomstate := make([]string, 0, len(conns))

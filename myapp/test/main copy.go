@@ -66,7 +66,7 @@ func makePrivateRoom(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "POST" {
 		user := r.FormValue("user")
 		roomName := r.FormValue("roomName")
-		http.Redirect(w, r, "/?user="+user+"&room="+roomName+"&private=ture", http.StatusFound) //進入聊天室
+		http.Redirect(w, r, "/?user="+user+"&room="+roomName+"&private=true", http.StatusFound) //進入聊天室
 
 	} else {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)

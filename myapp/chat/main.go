@@ -14,7 +14,7 @@ func serveHome(ctx *gin.Context) {
 	}
 	if ctx.Query("private") == "true" {
 		user := ctx.Query("user")
-		pusers := strings.Split(ctx.Query("room"), "-")
+		pusers := strings.Split(ctx.Param("roomId"), "-")
 		if len(pusers) != 2 {
 			ctx.JSON(400, gin.H{
 				"error": "missing RoomID",
@@ -35,14 +35,14 @@ func serveHome(ctx *gin.Context) {
 func login(ctx *gin.Context) {
 	username := strings.Trim(ctx.Request.FormValue("username"), " ")
 	CheckUser(username)
-	ctx.Redirect(http.StatusMovedPermanently, "/?user="+username+"&room=main&private=false")
+	ctx.Redirect(http.StatusMovedPermanently, "/chat/main/?user="+username+"&private=false")
 
 }
 
 func makePrivateRoom(ctx *gin.Context) {
 	username := ctx.Request.FormValue("user")
 	roomName := ctx.Request.FormValue("roomName")
-	ctx.Redirect(http.StatusMovedPermanently, "/?user="+username+"&room="+roomName+"&private=ture") //進入聊天室
+	ctx.Redirect(http.StatusMovedPermanently, "/chat/"+roomName+"?user="+username+"&private=true") //進入聊天室
 
 }
 
@@ -65,9 +65,11 @@ func main() {
 
 	router.GET("/", serveHome)
 
+	router.GET("/chat/:roomId", serveHome)
+
 	router.POST("/privateroom", makePrivateRoom)
 
-	router.GET("/ws", func(ctx *gin.Context) {
+	router.GET("/ws/chat/:roomId", func(ctx *gin.Context) {
 		serveWs(hub, ctx)
 	})
 

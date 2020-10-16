@@ -169,10 +169,7 @@ func serveWs(hub *Hub, ctx *gin.Context) {
 		return
 	}
 	username := ctx.Query("user")
-	room := ctx.Query("room")
-
-	fmt.Println("user:" + username + "/ room:" + room + " .registered")
-
+	room := ctx.Param("roomId")
 	private := ctx.Query("private")
 
 	var roomType string
@@ -181,6 +178,8 @@ func serveWs(hub *Hub, ctx *gin.Context) {
 	} else {
 		roomType = "normal"
 	}
+
+	fmt.Println("user:" + username + "/ room:" + room + " .registered type:"+roomType)
 
 	client := &Client{id: username, roomId: room, roomType: roomType, hub: hub, redis_conn: GetRedisClient(), conn: conn, send: make(chan []byte, 256)}
 	client.hub.register <- client
