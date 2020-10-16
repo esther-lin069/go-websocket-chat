@@ -44,6 +44,21 @@
             })
         }
 
+        function makeNormalRoom(user,roomName){
+            var xhr = new XMLHttpRequest();
+            $.ajax({
+                type: 'POST',
+                url: location.protocol + "/normalroom",
+                data: {"user":user,"roomName": roomName},
+                xhr: function(){
+                    return xhr
+                },
+                success:function(){
+                    window.location.href = xhr.responseURL
+                }
+            })
+        }
+
         window.onload = function () {
             var conn;
             var msg = document.getElementById("msg");
@@ -57,6 +72,45 @@
             //取得使用者ＩＤ
             $("#my-id").text(url.searchParams.get('user'))
             var user = $("#my-id").text()
+
+            //取得個人聊天室列表
+
+            addRoomList()
+            function addRoomList(){
+                var list = []
+                $.ajax({
+                type: 'POST',
+                url: location.protocol + "/roomlist",
+                data: {"user":user},
+                async: false,
+                success:function(e){
+                    list = e.rooms.split(",")
+                    
+                }
+                })
+                showRoomList(list)
+            }
+
+            //將聊天室清單印出區塊
+            function showRoomList(rooms){
+                for (var key in rooms) {
+                    var room = rooms[key]
+                        var roomTitle = room + "聊天室";
+                        if (room[key] == chatRoom) {
+                            roomTitle = "・" + roomTitle;
+                        }
+                        if (room == "main") {     //是大廳就不用列出
+                            $("#main-room").html("大廳")
+                            continue
+                        }
+                        var roomBox = $(`<dt>
+                                    <button onclick="goRoom(this)" class="div-ell mh20 room-box-text room-btn" value="${room}">${roomTitle}</button>
+                                </dt>`);
+                        $("#rooms dl").append(roomBox)
+                        //這裡有機會可改進為不同class
+
+                }
+            }
 
             //將聊天訊息放入聊天區塊
             function appendLog(item) {
@@ -146,22 +200,7 @@
                                 console.log(users)
                                 console.log(rooms)
 
-                                for (var room in rooms) {
-                                    var roomTitle = room + "聊天室(" + rooms[room] + ")";
-                                    if (room == chatRoom) {
-                                        roomTitle = "・" + roomTitle;
-                                    }
-                                    if (room == "main") {     //是大廳就不用列出
-                                        $("#main-room").html("大廳(" + rooms[room] + ")")
-                                        continue
-                                    }
-                                    var roomBox = $(`<dt>
-                                                <button onclick="goRoom(this)" class="div-ell mh20 room-box-text room-btn" value="${room}">${roomTitle}</button>
-                                            </dt>`);
-                                    $("#rooms dl").append(roomBox)
-                                    //這裡有機會可改進為不同class
-
-                                }
+                                
 
                             }
                             var item = $(`<div class="system-text"><label>${info.text}</label></div>`)
@@ -216,7 +255,7 @@
                         return false
                     }
 
-                    window.location.href = location.protocol + "/chat/"+ inputValue +"?user=" + user + "&private=false"; //轉址可能沒寫很好要再修改  
+                    makeNormalRoom(user,inputValue) 
                 });
             })
 

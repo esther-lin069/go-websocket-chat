@@ -79,7 +79,7 @@ func (h *Hub) run() {
 				break FOR
 			}
 
-			h.makeInfo()
+			//h.makeInfo()
 
 			/*系統資訊：所在房間人員名單*/
 			roomstate := make([]string, 0, len(conns))
@@ -120,7 +120,7 @@ func (h *Hub) run() {
 						break FOR
 					}
 
-					h.makeInfo()
+					//h.makeInfo()
 
 					/*系統資訊：所在房間人員名單*/
 					roomstate := make([]string, 0, len(conns))
@@ -176,7 +176,6 @@ func (h *Hub) run() {
 				msg := data[k].Member.(string)
 				client.send <- []byte(msg)
 			}
-
 		}
 	}
 }

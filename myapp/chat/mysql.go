@@ -50,5 +50,74 @@ func CheckUser(username string){
 	
 }
 
+func MakeRoom(roomId string){
+	//查詢其是否存在
+	rows, err := db.Query("SELECT roomId FROM chatrooms WHERE roomId = ?", roomId)
+	checkErr(err)
+
+	if rows.Next(){
+		//exists
+	} else{
+		//插入資料
+		stmt, err := db.Prepare("INSERT chatrooms SET roomId=?,create_at=?")
+		checkErr(err)
+
+		_, err = stmt.Exec(roomId, GetUTCTime())
+		checkErr(err)
+	}
+}
+
+func MakeUser_RoomCheck(username string, roomId string){
+
+	rows, err := db.Query("SELECT * FROM `user-room` WHERE user_id = ? AND room_id = ?", username, roomId)
+	checkErr(err)
+	defer rows.Close()
+
+	if rows.Next(){
+		//exists
+	} else{
+		//插入資料
+		stmt, err := db.Prepare("INSERT `user-room` SET user_id=?, room_id = ?, create_at=?")
+		checkErr(err)
+
+		_, err = stmt.Exec(username, roomId, GetUTCTime())
+		checkErr(err)
+	}
+
+	
+}
+
+func GetRoomList(username string) []string{
+	var roomList []string
+	var room string
+	rows, err := db.Query("SELECT room_id FROM `user-room` WHERE user_id = ?", username)
+	checkErr(err)
+	defer rows.Close()
+
+	for rows.Next(){
+		err := rows.Scan(&room)
+		checkErr(err)
+		
+		roomList = append(roomList, room)
+	}
+
+	return roomList
+}
+
+// func getUser_RoomID() []int{
+// 	var user_id int
+// 	var room_id int
+
+// 	urow := db.QueryRow("SELECT id FROM `users` WHERE username = ?", username)
+// 	uerr := urow.Scan(&user_id)
+// 	checkErr(uerr)
+
+// 	rrow := db.QueryRow("SELECT id FROM `chatrooms` WHERE roomId = ?", roomId)
+// 	rerr := rrow.Scan(&room_id)
+// 	checkErr(rerr)
+
+// 	return 
+// }
+
 
 
