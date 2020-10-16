@@ -78,6 +78,19 @@ type Client struct {
 	send chan []byte
 }
 
+func GetUTCTime() string {
+	tn := time.Now()
+	local, err := time.LoadLocation("UTC")
+	if err != nil {
+		fmt.Println(err)
+	}
+	t := tn.In(local)
+	formatted := fmt.Sprintf("%d-%02d-%02d %02d:%02d:%02d",
+		t.Year(), t.Month(), t.Day(),
+		t.Hour(), t.Minute(), t.Second())
+	return formatted
+}
+
 /*獲取Redis連線*/
 func GetRedisClient() *redis.Client {
 	return redis.NewClient(&redis.Options{

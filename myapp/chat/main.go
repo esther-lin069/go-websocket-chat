@@ -34,6 +34,7 @@ func serveHome(ctx *gin.Context) {
 
 func login(ctx *gin.Context) {
 	username := strings.Trim(ctx.Request.FormValue("username"), " ")
+	CheckUser(username)
 	ctx.Redirect(http.StatusMovedPermanently, "/?user="+username+"&room=main&private=false")
 
 }
@@ -47,6 +48,9 @@ func makePrivateRoom(ctx *gin.Context) {
 
 func main() {
 	hub := newHub()
+	db = InitDB()
+	defer db.Close()
+
 	go hub.run()
 
 	// ROUTER
