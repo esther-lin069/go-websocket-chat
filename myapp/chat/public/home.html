@@ -324,7 +324,10 @@
                 });
             })
 
+            /*使用者清單（all/now）切換*/
             $("#btn-all-users").click(function(){
+                $("#btn-now-users").css("color","#827a7a")
+                $("#btn-all-users").css("color","#413636")
                 $("#member-list").css("display","none")
                 $(".all-users").css("display","block")
                 $("#all-member-list").empty()
@@ -332,13 +335,15 @@
             })
 
             $("#btn-now-users").click(function(){
+                $("#btn-now-users").css("color","#413636")
+                $("#btn-all-users").css("color","#827a7a")
                 $("#member-list").css("display","block")
                 $(".all-users").css("display","none")
             })
 
+            // 從所有使用者中搜尋
             $("#user-search").on("keyup",function(){
                 let value = $(this).val();
-                console.log(value)
                 $("#all-member-list dt").filter(function(){
                     $(this).toggle($(this).text().indexOf(value) > -1)
                 })
@@ -388,8 +393,8 @@
     </div>
     <div id="member">
         <h5 class="title-text">
-            <button id="btn-now-users">在線列表</button>
-            <button id="btn-all-users">所有使用者</button>
+            <button class="list-btn" id="btn-now-users">在線列表</button><span> |</span>
+            <button class="list-btn" id="btn-all-users">所有使用者</button>
         </h5>
         <dl>
             <dt>
@@ -407,7 +412,7 @@
             <!-- 該聊天室內的使用者清單 -->
         </dl>
         <div class="all-users">
-            <input type="text"  id="user-search">
+            <label style="margin-left: 10%;">搜尋</label><input type="text" class="w3-input w3-border w3-round"  id="user-search">
             <dl id="all-member-list">
 
             </dl>
@@ -436,6 +441,15 @@
     }
 
     /* sprite */
+
+    #user-search{
+        width: 80%;
+        margin: 0 auto;
+    }
+    .list-btn{
+        background-color: unset;
+        border: 0;
+    }
     .room-title {
         padding-right: 1px;
         max-height: 15vh;
@@ -547,7 +561,6 @@ SVG Icons - svgicons.sparkk.fr
     /* area */
     .all-users{
         display: none;
-        background: #159ab1;
     }
 
     #rooms {
