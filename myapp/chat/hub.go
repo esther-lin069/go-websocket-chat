@@ -70,6 +70,16 @@ func (h *Hub) run() {
 				fmt.Println("新的聊天室被創建了")
 
 			}
+			/*如該client已經在連線中，將舊的連線關掉*/
+			for k, room := range h.rooms {
+				if k == client.roomId {
+					break
+				}
+				if c, found := room[client.id]; found {
+					close(c.send)
+					delete(room, c.id)
+				}
+			}
 			h.rooms[client.roomId][client.id] = client //將使用者存入聊天室map //->寫
 			mu.Unlock()                                //解除鎖定
 			fmt.Println("rooms：", h.rooms)
