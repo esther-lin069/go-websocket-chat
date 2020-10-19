@@ -43,13 +43,15 @@ N/normal:普通聊天室訊息
 A/all:全域廣播訊息
 H/hint:系統提示
 I/info:系統資訊
+P/private:私訊
 */
 type Message struct {
-	Sender  string `json:"sender"`
-	RoomId  string `json:"roomId"`
-	Type    string `json:"type"`
-	Content string `json:"content"`
-	Time    string `json:"time"`
+	Sender    string `json:"sender"`
+	Recipient string `json:"recipient"`
+	RoomId    string `json:"roomId"`
+	Type      string `json:"type"`
+	Content   string `json:"content"`
+	Time      int64  `json:"time"`
 }
 
 type RedisMsg struct {
@@ -179,7 +181,7 @@ func serveWs(hub *Hub, ctx *gin.Context) {
 		roomType = "normal"
 	}
 
-	fmt.Println("user:" + username + "/ room:" + room + " .registered type:"+roomType)
+	fmt.Println("user:" + username + "/ room:" + room + " .registered type:" + roomType)
 
 	client := &Client{id: username, roomId: room, roomType: roomType, hub: hub, redis_conn: GetRedisClient(), conn: conn, send: make(chan []byte, 256)}
 	client.hub.register <- client

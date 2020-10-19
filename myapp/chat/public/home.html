@@ -63,6 +63,7 @@
             var conn;
             var msg = document.getElementById("msg");
             var log = document.getElementById("log");
+            var inRoomSymb = "・";
 
             //取得聊天室ＩＤ	
             var url = new URL(location.href);
@@ -73,8 +74,13 @@
             $("#my-id").text(url.searchParams.get('user'))
             var user = $("#my-id").text()
 
-            //取得個人聊天室列表
+            //取得私訊與否
+            var privation = url.searchParams.get('private')
+            if(privation == "true"){
+                $("#room-id").text("私聊："+chatRoom)
+            }
 
+            //取得個人聊天室列表
             addRoomList()
             function addRoomList(){
                 var list = []
@@ -95,16 +101,16 @@
             function showRoomList(rooms){
                 for (var key in rooms) {
                     var room = rooms[key]
-                        var roomTitle = room + "聊天室";
-                        if (room[key] == chatRoom) {
-                            roomTitle = "・" + roomTitle;
+                        var roomTitle = room;
+                        if (rooms[key] == chatRoom) { //not work
+                            roomTitle = inRoomSymb + roomTitle;
                         }
                         if (room == "main") {     //是大廳就不用列出
                             $("#main-room").html("大廳")
                             continue
                         }
                         var roomBox = $(`<dt>
-                                    <button onclick="goRoom(this)" class="div-ell mh20 room-box-text room-btn" value="${room}">${roomTitle}</button>
+                                    <button onclick="goRoom(this)" class="div-ell mh20 room-box-text room-btn" value="${room}">${roomTitle} (<span>0</span>)</button>
                                 </dt>`);
                         $("#rooms dl").append(roomBox)
                         //這裡有機會可改進為不同class
@@ -125,6 +131,7 @@
             //傳送輸入框訊息to ws
             document.getElementById("form").onsubmit = function () {
                 var type = "N"
+                var recipient = ""
                 if (!conn) {
                     return false;
                 }
@@ -135,7 +142,18 @@
                 if ($("#msg-type").val() == "broadcast") {
                     type = "A"
                 }
-                jstr = JSON.stringify({ sender: user, roomId:chatRoom, type: type, content: msg.value, time:Date.now() });
+                if(privation == "true"){
+                    type = "P"
+                    let members = chatRoom.split("-")
+                    if(members[0] == user){
+                        recipient = members[1]
+                    }
+                    else{
+                        recipient = members[0]
+                    }
+
+                }
+                jstr = JSON.stringify({ sender: user, roomId:chatRoom,recipient:recipient ,type: type, content: msg.value, time:Date.now() });
                 conn.send(jstr)
                 msg.value = "";
                 return false;
@@ -192,14 +210,25 @@
                             }
                             //系統info
                             else {
-                                $("#rooms dl").empty()  //清空聊天室列表
+                                //$("#rooms dl").empty()  //清空聊天室列表
                                 $("#main-room").html("大廳") //清空大廳人數
                                 info = JSON.parse(chat.content)
                                 rooms = JSON.parse(info.room_info)
                                 users = info.user_info.split(',')
-                                console.log(users)
-                                console.log(rooms)
+                                console.log(users)      //聊天室所有在線人員
+                                console.log(rooms)      //聊天室名單對應人數
 
+                                /*聊天室人數變更*/
+                                let roomlist_states = (Object.keys(rooms))
+
+                                $("#rooms dt").each(function(){
+                                    let room_name = $(this).children().text()
+                                    room_name = room_name.substr(0,room_name.length-4).replace(inRoomSymb,"")
+
+                                    if(roomlist_states.includes(room_name)){
+                                        $(this).children().children().text(rooms[room_name])
+                                    }
+                                })
                                 
 
                             }
@@ -258,10 +287,6 @@
                     makeNormalRoom(user,inputValue) 
                 });
             })
-
-            // $(".box a").click(function(){
-            //     console.log($(this).data("id"))
-            // })
 
         };
     </script>

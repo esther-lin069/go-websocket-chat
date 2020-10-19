@@ -14,7 +14,7 @@ var mu sync.RWMutex
 // clients.
 type Hub struct {
 	// chat rooms
-	rooms map[string]map[*Client]bool
+	rooms map[string]map[string]*Client
 	// Registered clients.
 	clients map[*Client]bool
 
@@ -40,7 +40,7 @@ type SysMsg struct {
 
 func newHub() *Hub {
 	return &Hub{
-		rooms:      make(map[string]map[*Client]bool),
+		rooms:      make(map[string]map[string]*Client),
 		broadcast:  make(chan []byte),
 		loadmsg:    make(chan *Client),
 		register:   make(chan *Client),
@@ -65,34 +65,34 @@ func (h *Hub) run() {
 			/*如果聊天室不存在即建立新的*/
 			mu.Lock() //鎖定
 			if conns == nil {
-				conns = make(map[*Client]bool)
+				conns = make(map[string]*Client)
 				h.rooms[client.roomId] = conns //->寫
 				fmt.Println("新的聊天室被創建了")
 
 			}
-			h.rooms[client.roomId][client] = true //將使用者存入聊天室map //->寫
-			mu.Unlock()                           //解除鎖定
+			h.rooms[client.roomId][client.id] = client //將使用者存入聊天室map //->寫
+			mu.Unlock()                                //解除鎖定
 			fmt.Println("rooms：", h.rooms)
+
+			h.makeInfo()
 
 			/*判斷是否為私聊*/
 			if client.roomType == "private" {
 				break FOR
 			}
 
-			//h.makeInfo()
-
 			/*系統資訊：所在房間人員名單*/
 			roomstate := make([]string, 0, len(conns))
-			for con := range conns {
+			for _, con := range conns {
 				roomstate = append(roomstate, con.id)
 			}
 			/*製作系統提示(訊息＋人員名單)*/
 			sysmsg := client.id + " 進入 " + client.roomId + " 聊天室!"
 			data, _ := json.Marshal(&SysMsg{Text: sysmsg, RoomInfo: client.roomId, UserInfo: strings.Join(roomstate, ",")})
-			message, _ := json.Marshal(&Message{Sender: "SYS", RoomId: client.roomId, Type: "H", Content: string(data), Time: ""})
+			message, _ := json.Marshal(&Message{Sender: "SYS", RoomId: client.roomId, Type: "H", Content: string(data), Time: 0})
 
 			/*發送至該聊天室*/
-			for con := range conns {
+			for _, con := range conns {
 				con.send <- message
 			}
 
@@ -104,36 +104,36 @@ func (h *Hub) run() {
 		case client := <-h.unregister:
 			conns := h.rooms[client.roomId]
 			if conns != nil {
-				if _, ok := conns[client]; ok {
-					cleave := client.id 		//保留id以用做系統提示
-					delete(conns, client)
+				if _, ok := conns[client.id]; ok {
+					cleave := client.id //保留id以用做系統提示
+					delete(conns, client.id)
 					close(client.send)
-					client.redis_conn.Close() 	//關閉redis連線
+					client.redis_conn.Close() //關閉redis連線
 
 					/*聊天室若為空，則刪除該聊天室*/
 					if len(conns) == 0 {
 						delete(h.rooms, client.roomId)
 					}
 
+					h.makeInfo()
+
 					/*判斷是否為私聊*/
 					if client.roomType == "private" {
 						break FOR
 					}
 
-					//h.makeInfo()
-
 					/*系統資訊：所在房間人員名單*/
 					roomstate := make([]string, 0, len(conns))
-					for con := range conns {
+					for _, con := range conns {
 						roomstate = append(roomstate, con.id)
 					}
 					/*製作系統提示(訊息＋人員名單)*/
 					sysmsg := cleave + " 離開 " + client.roomId + " 聊天室!"
 					data, _ := json.Marshal(&SysMsg{Text: sysmsg, RoomInfo: client.roomId, UserInfo: strings.Join(roomstate, ",")})
-					message, _ := json.Marshal(&Message{Sender: "SYS", RoomId: client.roomId, Type: "H", Content: string(data), Time: ""})
+					message, _ := json.Marshal(&Message{Sender: "SYS", RoomId: client.roomId, Type: "H", Content: string(data), Time: 0})
 
 					/*發送至該聊天室*/
-					for con := range conns {
+					for _, con := range conns {
 						con.send <- message
 					}
 				}
@@ -146,6 +146,7 @@ func (h *Hub) run() {
 			var msg Message
 			err := json.Unmarshal(message, &msg) //轉換出使用者發的訊息內容
 			if err != nil {
+				fmt.Print(err)
 				fmt.Println(message)
 			}
 
@@ -155,9 +156,15 @@ func (h *Hub) run() {
 				break FOR
 			}
 
-			/*一般訊息只發送到該聊天室*/
 			conns := h.rooms[msg.RoomId]
-			for con := range conns {
+			//如果是私訊 通知該使用者
+			if msg.Type == "P" {
+				fmt.Println(msg.Recipient)
+				//還需要想該怎麼指到該接收者的*Client
+			}
+
+			/*一般訊息只發送到該聊天室*/
+			for _, con := range conns {
 				select {
 				case con.send <- message:
 				default:
@@ -165,8 +172,6 @@ func (h *Hub) run() {
 					delete(h.rooms, msg.RoomId)
 				}
 			}
-
-		//?如果是私訊 只發給該使用者
 
 		case client := <-h.loadmsg:
 			user_room := client.roomId
@@ -186,14 +191,14 @@ func (h *Hub) makeInfo() [2]string {
 	var chatusers []string
 	for room, users := range h.rooms {
 		chatrooms = append(chatrooms, "\""+room+"\":"+strconv.Itoa(len(h.rooms[room])))
-		for user := range users {
+		for _, user := range users {
 			var u Client = *user
 			chatusers = append(chatusers, u.id)
 		}
 	}
 
 	data, _ := json.Marshal(&SysMsg{Text: "", RoomInfo: "{" + strings.Join(chatrooms, ",") + "}", UserInfo: strings.Join(chatusers, ",")})
-	message, _ := json.Marshal(&Message{Sender: "SYS", RoomId: "", Type: "A", Content: string(data), Time: ""})
+	message, _ := json.Marshal(&Message{Sender: "SYS", RoomId: "", Type: "A", Content: string(data), Time: 0})
 
 	var info [2]string
 	info[0] = "{" + strings.Join(chatrooms, ",") + "}"
@@ -207,7 +212,7 @@ func (h *Hub) makeInfo() [2]string {
 /*全頻道廣播*/
 func (h *Hub) sys(message []byte) {
 	for _, conns := range h.rooms {
-		for con := range conns {
+		for _, con := range conns {
 			select {
 			case con.send <- message:
 
