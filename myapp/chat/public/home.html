@@ -83,7 +83,7 @@
             //取得個人聊天室列表
             addRoomList()
             function addRoomList(){
-                var list = []
+                let list = []
                 $.ajax({
                 type: 'POST',
                 url: location.protocol + "/roomlist",
@@ -95,6 +95,19 @@
                 }
                 })
                 showRoomList(list)
+            }
+
+            function getUserList(){
+                let list = []
+                $.ajax({
+                type: 'GET',
+                url: location.protocol + "/userlist",
+                async: false,
+                success:function(e){
+                    list = e.users.split(",")                    
+                }
+                })
+                showUserList(list)
             }
 
             //將聊天室清單印出區塊
@@ -116,6 +129,29 @@
                         //這裡有機會可改進為不同class
 
                 }
+            }
+
+            function showUserList(members){
+                members.forEach(element => {
+                    if (element == user) {  //是自己的話就不用列出
+                        return
+                    }
+                    //在線使用者名單
+                    var box = $(`<dt>
+                            <div class="card">
+                                <div class="box">
+                                <span style="color:#00798F;margin-right:8px;">
+                                    <i class="fa fa-user"></i>
+                                </span>
+                                <a onclick="makePrivateRoom(this)" class="pchat-btn" role="button" href="#" data-id="${element}">
+                                    <i class="fa fa-comment-dots"></i></a>
+                                <span class="box-text">${element}</span> 
+                                </div>
+                            </div>
+                        </dt>`)
+
+                    $("#all-member-list").append(box);
+                })
             }
 
             //將聊天訊息放入聊天區塊
@@ -288,6 +324,26 @@
                 });
             })
 
+            $("#btn-all-users").click(function(){
+                $("#member-list").css("display","none")
+                $(".all-users").css("display","block")
+                $("#all-member-list").empty()
+                getUserList();
+            })
+
+            $("#btn-now-users").click(function(){
+                $("#member-list").css("display","block")
+                $(".all-users").css("display","none")
+            })
+
+            $("#user-search").on("keyup",function(){
+                let value = $(this).val();
+                console.log(value)
+                $("#all-member-list dt").filter(function(){
+                    $(this).toggle($(this).text().indexOf(value) > -1)
+                })
+            })
+
         };
     </script>
 
@@ -331,7 +387,10 @@
 
     </div>
     <div id="member">
-        <h5 class="title-text">在線列表</h5>
+        <h5 class="title-text">
+            <button id="btn-now-users">在線列表</button>
+            <button id="btn-all-users">所有使用者</button>
+        </h5>
         <dl>
             <dt>
                 <div class="card">
@@ -347,6 +406,13 @@
         <dl id="member-list">
             <!-- 該聊天室內的使用者清單 -->
         </dl>
+        <div class="all-users">
+            <input type="text"  id="user-search">
+            <dl id="all-member-list">
+
+            </dl>
+        </div>
+        
 
     </div>
 
@@ -479,6 +545,11 @@ SVG Icons - svgicons.sparkk.fr
     }
 
     /* area */
+    .all-users{
+        display: none;
+        background: #159ab1;
+    }
+
     #rooms {
         overflow: auto;
         height: 68vh;
