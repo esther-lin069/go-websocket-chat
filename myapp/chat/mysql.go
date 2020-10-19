@@ -51,14 +51,14 @@ func CheckUser(username string) {
 
 func MakeRoom(roomId string) {
 	//查詢其是否存在
-	rows, err := db.Query("SELECT roomId FROM chatrooms WHERE roomId = ?", roomId)
+	rows, err := db.Query("SELECT roomId FROM rooms WHERE roomId = ?", roomId)
 	checkErr(err)
 
 	if rows.Next() {
 		//exists
 	} else {
 		//插入資料
-		stmt, err := db.Prepare("INSERT chatrooms SET roomId=?,create_at=?")
+		stmt, err := db.Prepare("INSERT rooms SET roomId=?,create_at=?")
 		checkErr(err)
 
 		_, err = stmt.Exec(roomId, GetUTCTime())
@@ -115,4 +115,18 @@ func GetUserList() []string {
 	}
 
 	return userList
+}
+
+func DelRoom(roomId string) {
+	fmt.Print("delete room:")
+	fmt.Println(roomId)
+	_, err := db.Exec("DELETE FROM rooms WHERE roomId = ?", roomId)
+	checkErr(err)
+
+	delKey(roomId)
+}
+
+func LeaveRoom(roomId string, user string) {
+	_, err := db.Exec("DELETE FROM `user-room` WHERE room_id = ? AND user_id = ?", roomId, user)
+	checkErr(err)
 }

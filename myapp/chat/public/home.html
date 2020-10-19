@@ -110,6 +110,42 @@
                 showUserList(list)
             }
 
+            function delRoom(id){
+                var xhr = new XMLHttpRequest();
+                $.ajax({
+                type: 'GET',
+                url: location.protocol + "/delete/" + id + "?user=" + user,
+                xhr: function(){
+                    return xhr
+                },
+                success:function(){
+                    swal ( "成功刪除" ,  id + "聊天室含淚跟你說再見" ,  "success" )
+                    window.location.href = xhr.responseURL
+                },
+                error:function(){
+                    swal ( "出錯了！刪除失敗！" ,  id + "聊天室陰魂不散～" ,  "error" )
+                }
+                })
+            }
+
+            function leaveRoom(id){
+                var xhr = new XMLHttpRequest();
+                $.ajax({
+                type: 'GET',
+                url: location.protocol + "/leave/" + id + "?user=" + user,
+                xhr: function(){
+                    return xhr
+                },
+                success:function(){
+                    swal ( "您已退出聊天室" ,  id + "裡的朋友們會想念你的" ,  "success" )
+                    window.location.href = xhr.responseURL
+                },
+                error:function(){
+                    swal ( "出錯了！" ,  id + "聊天室不想與你分開～" ,  "error" )
+                }
+                })
+            }
+
             //將聊天室清單印出區塊
             function showRoomList(rooms){
                 for (var key in rooms) {
@@ -349,6 +385,25 @@
                 })
             })
 
+            /*刪除房間中介點*/
+            $("#del-room-btn").click(function(){
+                swal({
+                    title: "刪除該聊天室？",
+                    text: "該聊天室資料與聊天記錄會全部消失",
+                    buttons: true,
+                    dangerMode: true,
+                }).then((willDelete) =>{
+                    if (willDelete) {
+                        delRoom(chatRoom)
+                    }
+                })
+                
+            })
+
+            $("#leave-room-btn").click(function(){
+                leaveRoom(chatRoom)
+            })
+
         };
     </script>
 
@@ -358,7 +413,12 @@
 
     <div id="room">
         <div class="room-title div-ell">
+            <!-- 聊天室名稱 -->
             <h1 class="title-text" id="room-id"></h1>
+            <!-- 刪除聊天室按鈕 -->
+            <button id="del-room-btn">刪除房間</button>
+            <!-- 離開聊天室按鈕 -->
+            <button id="leave-room-btn">退出房間</button>
         </div>
 
         <div id="rooms">
@@ -394,7 +454,7 @@
     <div id="member">
         <h5 class="title-text">
             <button class="list-btn" id="btn-now-users">在線列表</button><span> |</span>
-            <button class="list-btn" id="btn-all-users">所有使用者</button>
+            <button class="list-btn" id="btn-all-users" style="color:#827a7a;">所有使用者</button>
         </h5>
         <dl>
             <dt>

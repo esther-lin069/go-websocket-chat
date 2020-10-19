@@ -222,3 +222,11 @@ func (c *Client) zrangeMessage(id string, len int64) []redis.Z {
 	return data
 
 }
+
+func delKey(key string) {
+	rdb := GetRedisClient()
+	err := rdb.Del(key).Err()
+	if err != nil {
+		panic(err)
+	}
+}
