@@ -111,16 +111,13 @@
             }
 
             function delRoom(id){
-                var xhr = new XMLHttpRequest();
+
                 $.ajax({
                 type: 'GET',
                 url: location.protocol + "/delete/" + id + "?user=" + user,
-                xhr: function(){
-                    return xhr
-                },
                 success:function(){
                     swal ( "成功刪除" ,  id + "聊天室含淚跟你說再見" ,  "success" )
-                    window.location.href = xhr.responseURL
+                    //window.location.href = xhr.responseURL
                 },
                 error:function(){
                     swal ( "出錯了！刪除失敗！" ,  id + "聊天室陰魂不散～" ,  "error" )

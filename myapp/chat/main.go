@@ -76,7 +76,7 @@ func doDelRoom(ctx *gin.Context) {
 	fmt.Println("del!")
 	roomId := ctx.Param("roomId")
 	DelRoom(roomId)
-	ctx.Redirect(http.StatusMovedPermanently, "/chat/main/?user="+ctx.Query("user")+"&private=false") //進入聊天室
+	//ctx.Redirect(http.StatusMovedPermanently, "/chat/main/?user="+ctx.Query("user")+"&private=false") //進入聊天室
 }
 
 //退出房間
