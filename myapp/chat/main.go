@@ -46,21 +46,28 @@ func makePrivateRoom(ctx *gin.Context) {
 
 }
 
-func makeNormalRoom(ctx *gin.Context){
+func makeNormalRoom(ctx *gin.Context) {
 	username := ctx.Request.FormValue("user")
 	roomName := ctx.Request.FormValue("roomName")
 	MakeRoom(roomName)
-	MakeUser_RoomCheck(username,roomName)
+	MakeUser_RoomCheck(username, roomName)
 	ctx.Redirect(http.StatusMovedPermanently, "/chat/"+roomName+"?user="+username+"&private=false") //進入聊天室
 }
 
-func askRoomList(ctx *gin.Context){
+func askRoomList(ctx *gin.Context) {
 	username := ctx.Request.FormValue("user")
 	list := GetRoomList(username)
 	ctx.JSON(200, gin.H{
-		"rooms": strings.Join(list,","),
+		"rooms": strings.Join(list, ","),
 	})
-	
+
+}
+
+func askUserList(ctx *gin.Context) {
+	list := GetUserList()
+	ctx.JSON(200, gin.H{
+		"users": strings.Join(list, ","),
+	})
 }
 
 func main() {
@@ -83,6 +90,7 @@ func main() {
 	router.GET("/", serveHome)
 
 	router.POST("/roomlist", askRoomList)
+	router.GET("/userlist", askUserList)
 
 	router.GET("/chat/:roomId", serveHome)
 

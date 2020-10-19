@@ -184,8 +184,8 @@ func serveWs(hub *Hub, ctx *gin.Context) {
 	fmt.Println("user:" + username + "/ room:" + room + " .registered type:" + roomType)
 
 	client := &Client{id: username, roomId: room, roomType: roomType, hub: hub, redis_conn: GetRedisClient(), conn: conn, send: make(chan []byte, 256)}
-	client.hub.register <- client
 	client.hub.loadmsg <- client
+	client.hub.register <- client
 
 	// Allow collection of memory referenced by the caller by doing all work in new goroutines
 	go client.writePump()
