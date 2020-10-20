@@ -73,14 +73,18 @@ func askUserList(ctx *gin.Context) {
 //刪除房間
 func doDelRoom(ctx *gin.Context) {
 	roomId := ctx.Param("roomId")
-	ctx.JSON(200, gin.H{
-		"RoomId": roomId,
-	})
 	DelRoom(roomId)
+	ctx.Redirect(http.StatusMovedPermanently, "/chat/main/?user="+ctx.Query("user")+"&private=false") //進入聊天室
 
 }
 
 //退出房間
+func doLeaveRoom(ctx *gin.Context) {
+	roomId := ctx.Param("roomId")
+	user := ctx.Query("user")
+	LeaveRoom(roomId, user)
+	ctx.Redirect(http.StatusMovedPermanently, "/chat/main/?user="+ctx.Query("user")+"&private=false") //進入聊天室
+}
 
 func main() {
 	hub := newHub()
@@ -104,6 +108,7 @@ func main() {
 
 	router.GET("/chat/:roomId", serveHome)
 	router.GET("/delete/:roomId", doDelRoom)
+	router.GET("/leave/:roomId", doLeaveRoom)
 
 	router.POST("/privateroom", makePrivateRoom)
 	router.POST("/normalroom", makeNormalRoom)
