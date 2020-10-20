@@ -118,8 +118,8 @@ func GetUserList() []string {
 }
 
 func DelRoom(roomId string) {
-	fmt.Println("delete room:")
-	fmt.Print(roomId)
+	fmt.Print("delete room:")
+	fmt.Println(roomId)
 	_, err := db.Exec("DELETE FROM rooms WHERE roomId = ?", roomId)
 	checkErr(err)
 }

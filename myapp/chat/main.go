@@ -99,8 +99,6 @@ func main() {
 
 	router.POST("/login", login)
 
-	router.GET("/", serveHome)
-
 	router.POST("/roomlist", askRoomList)
 	router.GET("/userlist", askUserList)
 
@@ -121,6 +119,8 @@ func main() {
 			"Users": data[1],
 		})
 	})
+
+	router.GET("/", serveHome)
 
 	router.Run(":8080")
 
