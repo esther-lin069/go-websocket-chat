@@ -44,6 +44,7 @@ A/all:全域廣播訊息
 H/hint:系統提示
 I/info:系統資訊
 P/private:私訊
+WP/私訊通知
 */
 type Message struct {
 	Sender    string `json:"sender"`
@@ -192,7 +193,7 @@ func serveWs(hub *Hub, ctx *gin.Context) {
 	go client.readPump()
 }
 
-/*Redis存取*/
+/*Redis存取+刪除*/
 func (c *Client) zsetMessage(m RedisMsg) {
 	rdb := c.redis_conn
 
@@ -203,7 +204,10 @@ func (c *Client) zsetMessage(m RedisMsg) {
 
 	length := rdb.ZCard(m.User).Val()
 	if length >= zrange {
-		rdb.ZRemRangeByRank(m.User, 0, 1)
+		data := c.zrangeMessage(m.User, zrange/2)
+		//將前一半筆放入mysql
+		PutMsgList(m.User, data)
+		rdb.ZRemRangeByRank(m.User, 0, zrange/2)
 	}
 
 	err := rdb.ZAdd(m.User, msg).Err()

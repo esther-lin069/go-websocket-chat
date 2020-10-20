@@ -2,9 +2,11 @@ package main
 
 import (
 	"fmt"
+	"strings"
 
 	"database/sql"
 
+	"github.com/go-redis/redis"
 	_ "github.com/go-sql-driver/mysql"
 )
 
@@ -128,5 +130,25 @@ func DelRoom(roomId string) {
 
 func LeaveRoom(roomId string, user string) {
 	_, err := db.Exec("DELETE FROM `user-room` WHERE room_id = ? AND user_id = ?", roomId, user)
+	checkErr(err)
+}
+
+//將redis中的歷史資料放入mysql
+func PutMsgList(roomId string, data []redis.Z) {
+	items := []interface{}{}
+	sql := "INSERT `messages` (`roomId`, `content`, `msg_unix_time`) VALUES"
+	for _, v := range data {
+		var time float64 = v.Score
+
+		msg := v.Member.(string)
+		sql += "(?, ?, ?),"
+		items = append(items, roomId, msg, time/1e6) //納秒轉換成毫秒
+	}
+
+	//插入資料
+	stmt, err := db.Prepare(strings.Trim(sql, ","))
+	checkErr(err)
+
+	_, err = stmt.Exec(items...)
 	checkErr(err)
 }

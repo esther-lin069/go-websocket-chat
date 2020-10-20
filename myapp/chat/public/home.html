@@ -18,6 +18,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/2.1.4/toastr.min.js"></script>
     <script type="text/javascript">
 
+        // 聊天室列表之按鈕功能（前往）
         function goRoom(btn) {
             var str = location.search
             str = replaceQueryParam('private', "false", str)
@@ -30,6 +31,7 @@
             return (query.length > 2 ? query + "&" : "?") + (newval ? param + "=" + newval : '');
         }
 
+        // 建立私聊連結
         function makePrivateRoom(a) {
             var user = $("#my-id").text();
             var pusers = [user, $(a).data("id")].sort();
@@ -47,6 +49,7 @@
             })
         }
 
+        // 新建聊天室
         function makeNormalRoom(user, roomName) {
             var xhr = new XMLHttpRequest();
             $.ajax({
@@ -102,6 +105,7 @@
                 showRoomList(list)
             }
 
+            //拿取所有使用者列表
             function getUserList() {
                 let list = []
                 $.ajax({
@@ -112,9 +116,11 @@
                         list = e.users.split(",")
                     }
                 })
+                //顯示
                 showUserList(list)
             }
 
+            //刪除房間（資料庫）
             function delRoom(id) {
                 var xhr = new XMLHttpRequest();
                 $.ajax({
@@ -133,6 +139,7 @@
                 })
             }
 
+            //離開房間（刪除房間與自己的關聯＿資料庫）
             function leaveRoom(id) {
                 var xhr = new XMLHttpRequest();
                 $.ajax({
@@ -172,7 +179,7 @@
                 }
             }
 
-            //toastr通知設定
+            //私訊通知＿toastr通知設定
             function showToastr(id){
                 toastr.options = {
                     "closeButton": false,
@@ -195,13 +202,12 @@
             }
             
 
-            //所有使用者名單
+            //列出所有使用者名單
             function showUserList(members) {
                 members.forEach(element => {
                     if (element == user) {  //是自己的話就不用列出
                         return
                     }
-                    //在線使用者名單
                     var box = $(`<dt>
                             <div class="card">
                                 <div class="box">
@@ -435,6 +441,7 @@
 
             })
 
+            // 離開房間按鈕
             $("#leave-room-btn").click(function () {
                 leaveRoom(chatRoom)
             })
