@@ -5,7 +5,8 @@
     <title>Chat Example</title>
     <link rel="shortcut icon" href="#" />
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://pro.fontawesome.com/releases/v5.10.0/css/all.css" integrity="sha384-AYmEC3Yw5cVb3ZcuHtOA93w35dYTsvhLPVnYs9eStHfGJvOvKxVfELGroGkvsg+p" crossorigin="anonymous"/>
+    <link rel="stylesheet" href="https://pro.fontawesome.com/releases/v5.10.0/css/all.css"
+        integrity="sha384-AYmEC3Yw5cVb3ZcuHtOA93w35dYTsvhLPVnYs9eStHfGJvOvKxVfELGroGkvsg+p" crossorigin="anonymous" />
     <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
     <link href='https://cdnjs.cloudflare.com/ajax/libs/MaterialDesign-Webfont/3.6.95/css/materialdesignicons.css'>
     <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
@@ -13,12 +14,14 @@
     <script src="https://code.jquery.com/jquery-2.2.4.min.js"
         integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44=" crossorigin="anonymous"></script>
     <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/2.1.4/toastr.min.css" rel="stylesheet" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/2.1.4/toastr.min.js"></script>
     <script type="text/javascript">
 
         function goRoom(btn) {
             var str = location.search
             str = replaceQueryParam('private', "false", str)
-            window.location.href = location.protocol + "/chat/"+ $(btn).val() + str;
+            window.location.href = location.protocol + "/chat/" + $(btn).val() + str;
         }
         function replaceQueryParam(param, newval, search) {
             var regex = new RegExp("([?;&])" + param + "[^&;]*[;&]?");
@@ -27,33 +30,33 @@
             return (query.length > 2 ? query + "&" : "?") + (newval ? param + "=" + newval : '');
         }
 
-        function makePrivateRoom(a){
+        function makePrivateRoom(a) {
             var user = $("#my-id").text();
-            var pusers = [user,$(a).data("id")].sort();
+            var pusers = [user, $(a).data("id")].sort();
             var xhr = new XMLHttpRequest();
             $.ajax({
                 type: 'POST',
                 url: location.protocol + "/privateroom",
-                data: {"user":user,"roomName": pusers[0] + "-" + pusers[1]},
-                xhr: function(){
+                data: { "user": user, "roomName": pusers[0] + "-" + pusers[1] },
+                xhr: function () {
                     return xhr
                 },
-                success:function(){
+                success: function () {
                     window.location.href = xhr.responseURL
                 }
             })
         }
 
-        function makeNormalRoom(user,roomName){
+        function makeNormalRoom(user, roomName) {
             var xhr = new XMLHttpRequest();
             $.ajax({
                 type: 'POST',
                 url: location.protocol + "/normalroom",
-                data: {"user":user,"roomName": roomName},
-                xhr: function(){
+                data: { "user": user, "roomName": roomName },
+                xhr: function () {
                     return xhr
                 },
-                success:function(){
+                success: function () {
                     window.location.href = xhr.responseURL
                 }
             })
@@ -67,7 +70,7 @@
 
             //取得聊天室ＩＤ	
             var url = new URL(location.href);
-            $("#room-id").text(location.pathname.replace("/chat/",""))
+            $("#room-id").text(location.pathname.replace("/chat/", ""))
             var chatRoom = $("#room-id").text()
 
             //取得使用者ＩＤ
@@ -76,98 +79,124 @@
 
             //取得私訊與否
             var privation = url.searchParams.get('private')
-            if(privation == "true"){
-                $("#room-id").text("私聊："+chatRoom)
+            if (privation == "true") {
+                $("#room-id").text("私聊：" + chatRoom)
+                $("#del-room-btn").css("display", "none")
+                $("#leave-room-btn").css("display", "none")
             }
 
             //取得個人聊天室列表
             addRoomList()
-            function addRoomList(){
+            function addRoomList() {
                 let list = []
                 $.ajax({
-                type: 'POST',
-                url: location.protocol + "/roomlist",
-                data: {"user":user},
-                async: false,
-                success:function(e){
-                    list = e.rooms.split(",")
-                    
-                }
+                    type: 'POST',
+                    url: location.protocol + "/roomlist",
+                    data: { "user": user },
+                    async: false,
+                    success: function (e) {
+                        list = e.rooms.split(",")
+
+                    }
                 })
                 showRoomList(list)
             }
 
-            function getUserList(){
+            function getUserList() {
                 let list = []
                 $.ajax({
-                type: 'GET',
-                url: location.protocol + "/userlist",
-                async: false,
-                success:function(e){
-                    list = e.users.split(",")                    
-                }
+                    type: 'GET',
+                    url: location.protocol + "/userlist",
+                    async: false,
+                    success: function (e) {
+                        list = e.users.split(",")
+                    }
                 })
                 showUserList(list)
             }
 
-            function delRoom(id){
+            function delRoom(id) {
                 var xhr = new XMLHttpRequest();
                 $.ajax({
-                type: 'GET',
-                url: location.protocol + "/delete/" + id + "?user=" + user,
-                xhr: function(){
-                    return xhr
-                },
-                success:function(){
-                    swal ( "成功刪除" ,  id + "聊天室含淚跟你說再見" ,  "success" )
-                    window.location.href = xhr.responseURL
-                },
-                error:function(){
-                    swal ( "出錯了！刪除失敗！" ,  id + "聊天室陰魂不散～" ,  "error" )
-                }
+                    type: 'GET',
+                    url: location.protocol + "/delete/" + id + "?user=" + user,
+                    xhr: function () {
+                        return xhr
+                    },
+                    success: function () {
+                        swal("成功刪除", id + "聊天室含淚跟你說再見", "success")
+                        window.location.href = xhr.responseURL
+                    },
+                    error: function () {
+                        swal("出錯了！刪除失敗！", id + "聊天室陰魂不散～", "error")
+                    }
                 })
-             }
+            }
 
-            function leaveRoom(id){
+            function leaveRoom(id) {
                 var xhr = new XMLHttpRequest();
                 $.ajax({
-                type: 'GET',
-                url: location.protocol + "/leave/" + id + "?user=" + user,
-                xhr: function(){
-                    return xhr
-                },
-                success:function(){
-                    swal ( "您已退出聊天室" ,  id + "裡的朋友們會想念你的" ,  "success" )
-                    window.location.href = xhr.responseURL
-                },
-                error:function(){
-                    swal ( "出錯了！" ,  id + "聊天室不想與你分開～" ,  "error" )
-                }
+                    type: 'GET',
+                    url: location.protocol + "/leave/" + id + "?user=" + user,
+                    xhr: function () {
+                        return xhr
+                    },
+                    success: function () {
+                        swal("您已退出聊天室", id + "裡的朋友們會想念你的", "success")
+                        window.location.href = xhr.responseURL
+                    },
+                    error: function () {
+                        swal("出錯了！", id + "聊天室不想與你分開～", "error")
+                    }
                 })
             }
 
             //將聊天室清單印出區塊
-            function showRoomList(rooms){
+            function showRoomList(rooms) {
                 for (var key in rooms) {
                     var room = rooms[key]
-                        var roomTitle = room;
-                        if (rooms[key] == chatRoom) { //not work
-                            roomTitle = inRoomSymb + roomTitle;
-                        }
-                        if (room == "main") {     //是大廳就不用列出
-                            $("#main-room").html("大廳")
-                            continue
-                        }
-                        var roomBox = $(`<dt>
+                    var roomTitle = room;
+                    if (rooms[key] == chatRoom) { //not work
+                        roomTitle = inRoomSymb + roomTitle;
+                    }
+                    if (room == "main") {     //是大廳就不用列出
+                        $("#main-room").html("大廳")
+                        continue
+                    }
+                    var roomBox = $(`<dt>
                                     <button onclick="goRoom(this)" class="div-ell mh20 room-box-text room-btn" value="${room}">${roomTitle} (<span>0</span>)</button>
                                 </dt>`);
-                        $("#rooms dl").append(roomBox)
-                        //這裡有機會可改進為不同class
+                    $("#rooms dl").append(roomBox)
+                    //這裡有機會可改進為不同class
 
                 }
             }
 
-            function showUserList(members){
+            //toastr通知設定
+            function showToastr(id){
+                toastr.options = {
+                    "closeButton": false,
+                    "debug": false,
+                    "newestOnTop": false,
+                    "progressBar": false,
+                    "positionClass": "toast-bottom-right",
+                    "preventDuplicates": false,
+                    "onclick": null,
+                    "showDuration": "300",
+                    "hideDuration": "1000",
+                    "timeOut": "3000",
+                    "extendedTimeOut": "1000",
+                    "showEasing": "swing",
+                    "hideEasing": "linear",
+                    "showMethod": "fadeIn",
+                    "hideMethod": "fadeOut"
+                }
+                toastr["info"]("您有來自"+id+"的私訊", "通知");
+            }
+            
+
+            //所有使用者名單
+            function showUserList(members) {
                 members.forEach(element => {
                     if (element == user) {  //是自己的話就不用列出
                         return
@@ -214,18 +243,18 @@
                 if ($("#msg-type").val() == "broadcast") {
                     type = "A"
                 }
-                if(privation == "true"){
+                if (privation == "true") {
                     type = "P"
                     let members = chatRoom.split("-")
-                    if(members[0] == user){
+                    if (members[0] == user) {
                         recipient = members[1]
                     }
-                    else{
+                    else {
                         recipient = members[0]
                     }
 
                 }
-                jstr = JSON.stringify({ sender: user, roomId:chatRoom,recipient:recipient ,type: type, content: msg.value, time:Date.now() });
+                jstr = JSON.stringify({ sender: user, roomId: chatRoom, recipient: recipient, type: type, content: msg.value, time: Date.now() });
                 conn.send(jstr)
                 msg.value = "";
                 return false;
@@ -269,7 +298,7 @@
                                                 <span style="color:#00798F;margin-right:8px;">
                                                     <i class="fa fa-user"></i>
                                                 </span>
-                                                <a onclick="makePrivateRoom(this)" class="pchat-btn" role="button" href="#" data-id="${element}">
+                                                <a onclick="makePrivateRoom(this)" id="WP-${element}" class="pchat-btn" role="button" href="#" data-id="${element}">
                                                     <i class="fa fa-comment-dots"></i></a>
                                                 <span class="box-text">${element}</span> 
                                                 </div>
@@ -279,6 +308,12 @@
                                     $("#member-list").append(box)
 
                                 });
+                            }
+                            else if (chat.type == "WP") {
+                                if (!chatRoom.includes(chat.content) && privation != true){
+                                    showToastr(chat.content)
+                                }
+                                
                             }
                             //系統info
                             else {
@@ -293,15 +328,15 @@
                                 /*聊天室人數變更*/
                                 let roomlist_states = (Object.keys(rooms))
 
-                                $("#rooms dt").each(function(){
+                                $("#rooms dt").each(function () {
                                     let room_name = $(this).children().text()
-                                    room_name = room_name.substr(0,room_name.length-4).replace(inRoomSymb,"")
+                                    room_name = room_name.substr(0, room_name.length - 4).replace(inRoomSymb, "")
 
-                                    if(roomlist_states.includes(room_name)){
+                                    if (roomlist_states.includes(room_name)) {
                                         $(this).children().children().text(rooms[room_name])
                                     }
                                 })
-                                
+
 
                             }
                             var item = $(`<div class="system-text"><label>${info.text}</label></div>`)
@@ -356,51 +391,51 @@
                         return false
                     }
 
-                    makeNormalRoom(user,inputValue) 
+                    makeNormalRoom(user, inputValue)
                 });
             })
 
             /*使用者清單（all/now）切換*/
-            $("#btn-all-users").click(function(){
-                $("#btn-now-users").css("color","#827a7a")
-                $("#btn-all-users").css("color","#413636")
-                $("#member-list").css("display","none")
-                $(".all-users").css("display","block")
+            $("#btn-all-users").click(function () {
+                $("#btn-now-users").css("color", "#827a7a")
+                $("#btn-all-users").css("color", "#413636")
+                $("#member-list").css("display", "none")
+                $(".all-users").css("display", "block")
                 $("#all-member-list").empty()
                 getUserList();
             })
 
-            $("#btn-now-users").click(function(){
-                $("#btn-now-users").css("color","#413636")
-                $("#btn-all-users").css("color","#827a7a")
-                $("#member-list").css("display","block")
-                $(".all-users").css("display","none")
+            $("#btn-now-users").click(function () {
+                $("#btn-now-users").css("color", "#413636")
+                $("#btn-all-users").css("color", "#827a7a")
+                $("#member-list").css("display", "block")
+                $(".all-users").css("display", "none")
             })
 
             // 從所有使用者中搜尋
-            $("#user-search").on("keyup",function(){
+            $("#user-search").on("keyup", function () {
                 let value = $(this).val();
-                $("#all-member-list dt").filter(function(){
+                $("#all-member-list dt").filter(function () {
                     $(this).toggle($(this).text().indexOf(value) > -1)
                 })
             })
 
             /*刪除房間中介點*/
-            $("#del-room-btn").click(function(){
+            $("#del-room-btn").click(function () {
                 swal({
                     title: "刪除該聊天室？",
                     text: "該聊天室資料與聊天記錄會全部消失",
                     buttons: true,
                     dangerMode: true,
-                }).then((willDelete) =>{
+                }).then((willDelete) => {
                     if (willDelete) {
                         delRoom(chatRoom)
                     }
                 })
-                
+
             })
 
-            $("#leave-room-btn").click(function(){
+            $("#leave-room-btn").click(function () {
                 leaveRoom(chatRoom)
             })
 
@@ -472,12 +507,13 @@
             <!-- 該聊天室內的使用者清單 -->
         </dl>
         <div class="all-users">
-            <label style="margin-left: 10%;">搜尋</label><input type="text" class="w3-input w3-border w3-round"  id="user-search">
+            <label style="margin-left: 10%;">搜尋</label><input type="text" class="w3-input w3-border w3-round"
+                id="user-search">
             <dl id="all-member-list">
 
             </dl>
         </div>
-        
+
 
     </div>
 
@@ -502,21 +538,23 @@
 
     /* sprite */
 
-    #user-search{
+    #user-search {
         width: 80%;
         margin: 0 auto;
     }
-    .list-btn{
+
+    .list-btn {
         background-color: unset;
         border: 0;
     }
+
     .room-title {
         padding-right: 1px;
         max-height: 15vh;
         width: 100%;
     }
 
-    .chat-text{
+    .chat-text {
         margin-bottom: 5px;
     }
 
@@ -619,7 +657,7 @@ SVG Icons - svgicons.sparkk.fr
     }
 
     /* area */
-    .all-users{
+    .all-users {
         display: none;
     }
 

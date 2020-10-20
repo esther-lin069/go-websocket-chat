@@ -166,13 +166,17 @@ func (h *Hub) run() {
 				break FOR
 			}
 
-			conns := h.rooms[msg.RoomId]
 			//如果是私訊 通知該使用者
 			if msg.Type == "P" {
-				fmt.Println(msg.Recipient)
-				//還需要想該怎麼指到該接收者的*Client
+				message, _ := json.Marshal(&Message{Sender: "SYS", RoomId: "", Type: "WP", Content: msg.Sender, Time: 0})
+				for _, con := range h.rooms {
+					if c, ok := con[msg.Recipient]; ok {
+						c.send <- message
+					}
+				}
 			}
 
+			conns := h.rooms[msg.RoomId]
 			/*一般訊息只發送到該聊天室*/
 			for _, con := range conns {
 				select {
