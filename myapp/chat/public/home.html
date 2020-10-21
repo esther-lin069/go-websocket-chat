@@ -82,8 +82,11 @@
 
             //取得私訊與否
             var privation = url.searchParams.get('private')
-            if (privation == "true") {
-                $("#room-id").text("私聊：" + chatRoom)
+            
+            if (privation == "true" || chatRoom == "main") {
+                if(privation == "true"){
+                    $("#room-id").text("私聊：" + chatRoom)
+                }
                 $("#del-room-btn").css("display", "none")
                 $("#leave-room-btn").css("display", "none")
             }
@@ -458,9 +461,9 @@
             <!-- 聊天室名稱 -->
             <h1 class="title-text" id="room-id"></h1>
             <!-- 刪除聊天室按鈕 -->
-            <button id="del-room-btn">刪除房間</button>
+            <button class="exit-btn" id="del-room-btn">刪除房間</button>
             <!-- 離開聊天室按鈕 -->
-            <button id="leave-room-btn">退出房間</button>
+            <button class="exit-btn" id="leave-room-btn">退出房間</button>
         </div>
 
         <div id="rooms">
@@ -544,6 +547,21 @@
     }
 
     /* sprite */
+
+    .exit-btn{
+        margin-left: 0.5em;
+        border: 0.05em;
+        border-radius: 0.3em;
+        border-style: solid;
+        border-color:transparent;
+        background:#A3D0D9;
+        padding: 3px 8px 3px 8px;
+    }
+
+    .exit-btn:hover{
+        background: #159ab1;
+        color: white;
+    }
 
     #user-search {
         width: 80%;
