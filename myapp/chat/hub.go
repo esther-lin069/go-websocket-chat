@@ -6,6 +6,7 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+	"time"
 )
 
 var mu sync.RWMutex
@@ -241,5 +242,16 @@ func (h *Hub) sys(message []byte) {
 	}
 }
 
-/*這裡可以寫一個讀取終端機輸入然後作為公告發送的功能*/
+/*定時發送系統公告*/
+func (h *Hub) sysTicker() {
+
+	timer := time.NewTicker(300 * time.Second)
+	for {
+		<-timer.C
+		message, _ := json.Marshal(&Message{Sender: "系統", RoomId: "", Type: "A", Content: "在這裡，每300秒就有五分鐘過去，珍惜眼睛，看看窗外", Time: 0})
+		h.sys(message)
+	}
+
+}
+
 /*這裡要有一個固定拿redis快取資料的func*/

@@ -93,7 +93,7 @@ func main() {
 	defer db.Close()
 
 	go hub.run()
-
+	go hub.sysTicker()
 	// ROUTER
 	router := gin.Default()
 	router.LoadHTMLGlob("public/*")
