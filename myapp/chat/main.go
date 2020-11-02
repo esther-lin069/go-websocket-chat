@@ -63,8 +63,9 @@ func askRoomList(ctx *gin.Context) {
 
 }
 
-func askUserList(ctx *gin.Context) {
+func askUserList(hub *Hub, ctx *gin.Context) {
 	list := GetUserList()
+	//online_list := hub.makeInfo("get")
 	ctx.JSON(200, gin.H{
 		"users": strings.Join(list, ","),
 	})
@@ -104,7 +105,9 @@ func main() {
 	router.POST("/login", login)
 
 	router.POST("/roomlist", askRoomList)
-	router.GET("/userlist", askUserList)
+	router.GET("/userlist", func(ctx *gin.Context) {
+		askUserList(hub, ctx)
+	})
 
 	router.GET("/chat/:roomId", serveHome)
 	router.GET("/delete/:roomId", doDelRoom)
@@ -117,13 +120,13 @@ func main() {
 		serveWs(hub, ctx)
 	})
 
-	router.GET("/info", func(ctx *gin.Context) {
-		data := hub.makeInfo()
-		ctx.JSON(200, gin.H{
-			"Rooms": data[0],
-			"Users": data[1],
-		})
-	})
+	// router.GET("/info", func(ctx *gin.Context) {
+	// 	data := hub.makeInfo("get")
+	// 	ctx.JSON(200, gin.H{
+	// 		"Rooms": data[0],
+	// 		"Users": data[1],
+	// 	})
+	// })
 
 	router.GET("/", serveHome)
 

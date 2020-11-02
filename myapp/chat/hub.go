@@ -84,7 +84,7 @@ func (h *Hub) run() {
 			mu.Unlock()                                //解除鎖定
 			fmt.Println("rooms：", h.rooms)
 
-			h.makeInfo()
+			h.makeInfo("send")
 
 			/*判斷是否為私聊*/
 			if client.roomType == "private" {
@@ -125,7 +125,7 @@ func (h *Hub) run() {
 						delete(h.rooms, client.roomId)
 					}
 
-					h.makeInfo()
+					h.makeInfo("send")
 
 					/*判斷是否為私聊*/
 					if client.roomType == "private" {
@@ -200,27 +200,31 @@ func (h *Hub) run() {
 }
 
 /*獲取聊天室列表和使用者名單*/
-func (h *Hub) makeInfo() [2]string {
+func (h *Hub) makeInfo(typeof string) map[string]string {
 	chatrooms := make([]string, 0, len(h.rooms))
 	var chatusers []string
+	var user_room = make(map[string]string)
 	for room, users := range h.rooms {
 		chatrooms = append(chatrooms, "\""+room+"\":"+strconv.Itoa(len(h.rooms[room])))
 		for _, user := range users {
 			var u Client = *user
 			chatusers = append(chatusers, u.id)
+			user_room[u.id] = room
 		}
 	}
-
-	data, _ := json.Marshal(&SysMsg{Text: "", RoomInfo: "{" + strings.Join(chatrooms, ",") + "}", UserInfo: strings.Join(chatusers, ",")})
-	message, _ := json.Marshal(&Message{Sender: "SYS", RoomId: "", Type: "A", Content: string(data), Time: 0})
 
 	var info [2]string
 	info[0] = "{" + strings.Join(chatrooms, ",") + "}"
 	info[1] = strings.Join(chatusers, ",")
 
-	// 發送系統資訊至聊天室
-	h.sys(message)
-	return info
+	if typeof == "send" {
+		data, _ := json.Marshal(&SysMsg{Text: "", RoomInfo: info[0], UserInfo: info[1]})
+		message, _ := json.Marshal(&Message{Sender: "SYS", RoomId: "", Type: "A", Content: string(data), Time: 0})
+		h.sys(message)
+
+	}
+	return user_room
+
 }
 
 /*全頻道廣播*/
