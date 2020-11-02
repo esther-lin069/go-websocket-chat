@@ -244,11 +244,11 @@ func (h *Hub) sys(message []byte) {
 
 /*定時發送系統公告*/
 func (h *Hub) sysTicker() {
-
-	timer := time.NewTicker(300 * time.Second)
+	ticker := time.NewTicker(300 * time.Second)
+	defer ticker.Stop()
 	for {
-		<-timer.C
-		message, _ := json.Marshal(&Message{Sender: "系統", RoomId: "", Type: "A", Content: "在這裡，每300秒就有五分鐘過去，珍惜眼睛，看看窗外", Time: 0})
+		<-ticker.C
+		message, _ := json.Marshal(&Message{Sender: "系統", RoomId: "", Type: "A", Content: "在這裡，每300秒就有五分鐘過去，珍惜眼睛，看看窗外", Time: time.Now().Unix()})
 		h.sys(message)
 	}
 
