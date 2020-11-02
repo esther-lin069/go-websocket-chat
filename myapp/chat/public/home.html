@@ -237,6 +237,12 @@
                     log.scrollTop = log.scrollHeight - log.clientHeight;
                 }
             }
+            //判斷是否為超連結
+            function isUrl(v){
+                var reg = /(http:\/\/|https:\/\/)((\w|=|\?|\.|\/|&|#|-)+)/g;
+                v = v.replace(reg, `<a href='$1$2' target="_blank">$1$2</a>`).replace(/\n/g, "<br />");
+                return v
+            }
 
             //傳送輸入框訊息to ws
             document.getElementById("form").onsubmit = function () {
@@ -351,9 +357,12 @@
                             var item = $(`<div class="system-text"><label>${info.text}</label></div>`)
                         }
                         else {
-
+                            var text = isUrl(chat.content)
                             if (chat.type == "A") {
-                                var bro_content = chat.content;
+                                if (privation == "true"){ //是私訊的話把全域廣播擋下來
+                                    return
+                                }
+                                var bro_content = text;
                                 var item = $(`<div class="chat-text">
                                 <label class="sm-text"><span style="font-weight: 1000;">${chat.sender}</span> 於 ${chatTime} 廣播</lable><br>
                                 <label class="bro-text">&nbsp;&nbsp;${bro_content}</label>
@@ -363,7 +372,7 @@
                             else {
                                 var item = $(`<div class="chat-text">
                                     <label class="sm-text"><span style="font-weight: 1000;">${chat.sender}</span> 於 ${chatTime}</lable><br>
-                                    <label class="md-text">&nbsp;&nbsp;${chat.content}</label>
+                                    <label class="md-text">&nbsp;&nbsp;${text}</label>
                                 </div>`)
                             }
                         }
