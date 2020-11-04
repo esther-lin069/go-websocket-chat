@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"strings"
 
@@ -151,4 +152,20 @@ func PutMsgList(roomId string, data []redis.Z) {
 
 	_, err = stmt.Exec(items...)
 	checkErr(err)
+}
+
+func PutMsgSingle(message []byte) {
+	var msg Message
+	err := json.Unmarshal(message, &msg)
+	if err != nil {
+		fmt.Print(err)
+		fmt.Println(message)
+	}
+	//插入資料
+	stmt, err := db.Prepare("INSERT INTO `msg` (`id`, `sender`, `recipient`, `room_id`, `type`, `content`, `data_time`) VALUES (NULL, ?, ?, ?, ?, ?, ?)")
+	checkErr(err)
+
+	_, err = stmt.Exec(msg.Sender, msg.Recipient, msg.RoomId, msg.Type, msg.Content, msg.Time)
+	checkErr(err)
+
 }

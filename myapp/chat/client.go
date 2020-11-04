@@ -125,6 +125,9 @@ func (c *Client) readPump() {
 		m := RedisMsg{c.roomId, float64(time.Now().UnixNano()), message}
 		c.zsetMessage(m) //以毫秒作為key
 
+		/*存入Mysql*/
+		PutMsgSingle(message)
+
 		c.hub.broadcast <- message
 	}
 }
@@ -204,9 +207,9 @@ func (c *Client) zsetMessage(m RedisMsg) {
 
 	length := rdb.ZCard(m.User).Val()
 	if length >= zrange {
-		data := c.zrangeMessage(m.User, zrange/2)
+		//data := c.zrangeMessage(m.User, zrange/2)
 		//將前一半筆放入mysql
-		PutMsgList(m.User, data)
+		//PutMsgList(m.User, data)
 		rdb.ZRemRangeByRank(m.User, 0, zrange/2)
 	}
 
