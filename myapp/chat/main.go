@@ -97,6 +97,7 @@ func main() {
 	// ROUTER
 	router := gin.Default()
 	router.LoadHTMLGlob("public/*")
+	router.Static("/js", "./js")
 
 	router.GET("/login", func(ctx *gin.Context) {
 		ctx.HTML(http.StatusOK, "login.html", nil)
