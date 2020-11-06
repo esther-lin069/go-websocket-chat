@@ -53,8 +53,7 @@ window.onload = function () {
 
     //取得聊天室ＩＤ	
     var url = new URL(location.href);
-    $("#room-id").text(location.pathname.replace("/chat/", ""))
-    var chatRoom = $("#room-id").text()
+    var chatRoom = location.pathname.replace("/chat/", "")
 
     //取得使用者ＩＤ
     $("#my-id").text(url.searchParams.get('user'))

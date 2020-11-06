@@ -13,7 +13,8 @@
     <!-- jquery -->
     <script src="https://code.jquery.com/jquery-2.2.4.min.js"
         integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44=" crossorigin="anonymous"></script>
-    
+    <!-- vue.js -->
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
     <!-- 功能性套件 -->
     <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/2.1.4/toastr.min.css" rel="stylesheet" />
@@ -38,9 +39,9 @@
     </div>
     <!-- left: room information -->
     <div id="room">
-        <div class="room-title div-ell">
+        <div id="room-title" class="room-title div-ell">
             <!-- 聊天室名稱 -->
-            <h1 class="title-text" id="room-id"></h1>
+            <h1 class="title-text" v-text="title" id="room-id"></h1>
             <!-- 刪除聊天室按鈕 -->
             <button class="exit-btn" id="del-room-btn">刪除房間</button>
             <!-- 離開聊天室按鈕 -->
@@ -76,7 +77,6 @@
                 <button type="submit">Send</button>
             </form>
         </div>
-
     </div>
     <!-- right: member list -->
     <div id="member">
@@ -114,4 +114,6 @@
 
 
 </body>
+<script src="../asset/js/home_vue.js"></script>
+<!--<script src="../asset/js/ws.js"></script> -->
 </html>
