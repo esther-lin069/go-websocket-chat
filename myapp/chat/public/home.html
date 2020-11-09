@@ -27,6 +27,8 @@
 
     <!-- 自訂js -->
     <script src="../asset/js/home.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <!-- <script src="../asset/js/ws.js"></script> -->
 
 </head>
 <body>
@@ -41,11 +43,11 @@
     <div id="room">
         <div id="room-title" class="room-title div-ell">
             <!-- 聊天室名稱 -->
-            <h1 class="title-text" v-text="title" id="room-id"></h1>
+            <h1 class="title-text" id="room-id">{{ title }}</h1>
             <!-- 刪除聊天室按鈕 -->
-            <button class="exit-btn" id="del-room-btn">刪除房間</button>
+            <button class="exit-btn" @click="DeleteRoom(title)" id="del-room-btn">刪除房間</button>
             <!-- 離開聊天室按鈕 -->
-            <button class="exit-btn" id="leave-room-btn">退出房間</button>
+            <button class="exit-btn" @click="LeaveRoom(title)" id="leave-room-btn">退出房間</button>
         </div>
 
         <div id="rooms">
@@ -58,10 +60,21 @@
                     </svg>
                 </button>
             </h5>
-            <button id="main-room" onclick="goRoom(this)" class="mh20 room-box-text room-btn" value="main">大廳</button>
-            <dl>
-                <!-- 聊天室列表 -->
-            </dl>
+            <!-- 聊天室列表 -->
+            <div id="roomList">
+            <button id="main-room" @click="goToRoom('main')" class="mh20 room-box-text room-btn" value="main">大廳</button>
+                <dl>
+                    <!-- 大廳除外的聊天室列表 -->
+                    <dt
+                        v-for="(room, index) in rooms"
+                        :room="room"
+                        :id="room.room_id"
+                        :key="index"
+                    >
+                        <button @click="goToRoom(room.room_id)" class="mh20 room-box-text room-btn">{{ room.room_id }} ({{ room.len }})</button>
+                    </dt>
+                </dl>
+            </div>            
         </div>
     </div>
     <!-- center: chat field -->
@@ -86,12 +99,12 @@
         </h5>
         <dl>
             <dt>
-                <div class="card">
+                <div id="myUserBlock" class="card">
                     <div class="box">
                         <span style="color:rgb(230, 215, 102);margin-right:8px;">
                             <i class="fa fa-user"></i>
                         </span>
-                        <span id="my-id" class="box-text"></span>
+                        <span id="my-id" class="box-text">{{ username }}</span>
                     </div>
                 </div>
             </dt>
@@ -115,5 +128,4 @@
 
 </body>
 <script src="../asset/js/home_vue.js"></script>
-<!--<script src="../asset/js/ws.js"></script> -->
 </html>

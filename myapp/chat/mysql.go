@@ -20,6 +20,11 @@ const (
 
 var db *sql.DB
 
+type RoomList struct {
+	Id   int    `json:"id"`
+	Room string `json:"room"`
+}
+
 func checkErr(err error) {
 	if err != nil {
 		panic(err)
@@ -97,7 +102,7 @@ func GetRoomList(username string) []string {
 	for rows.Next() {
 		err := rows.Scan(&room)
 		checkErr(err)
-
+		//json, _ := json.Marshal(&RoomList{Id: len(roomList), Room: room})
 		roomList = append(roomList, room)
 	}
 

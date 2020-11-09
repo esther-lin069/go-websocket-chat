@@ -12,7 +12,7 @@ window.onload = function () {
         conn.onmessage = function (evt) {
             var messages = evt.data.split('\n');
             for (var i = 0; i < messages.length; i++) {
-                //HandleMessage (messages[i])
+                HandleMessage (messages[i])
             }
         }
     } else {

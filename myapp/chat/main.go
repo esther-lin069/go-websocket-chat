@@ -55,7 +55,7 @@ func makeNormalRoom(ctx *gin.Context) {
 }
 
 func askRoomList(ctx *gin.Context) {
-	username := ctx.Request.FormValue("user")
+	username := ctx.Query("user")
 	list := GetRoomList(username)
 	ctx.JSON(200, gin.H{
 		"rooms": strings.Join(list, ","),
@@ -96,7 +96,8 @@ func main() {
 	go hub.sysTicker()
 	// ROUTER
 	router := gin.Default()
-	router.LoadHTMLGlob("public/*")
+	router.Delims("{[{", "}]}") //自定義模板隔符避免與Vue衝突
+	router.LoadHTMLFiles("public/home.html", "public/login.html")
 	router.Static("/asset", "./asset")
 
 	router.GET("/login", func(ctx *gin.Context) {
@@ -105,7 +106,7 @@ func main() {
 
 	router.POST("/login", login)
 
-	router.POST("/roomlist", askRoomList)
+	router.GET("/roomlist", askRoomList)
 	router.GET("/userlist", func(ctx *gin.Context) {
 		askUserList(hub, ctx)
 	})

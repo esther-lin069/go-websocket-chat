@@ -1,15 +1,3 @@
-// 聊天室列表之按鈕功能（前往）
-function goRoom(btn) {
-    var str = location.search
-    str = replaceQueryParam('private', "false", str)
-    window.location.href = location.protocol + "/chat/" + $(btn).val() + str;
-}
-function replaceQueryParam(param, newval, search) {
-    var regex = new RegExp("([?;&])" + param + "[^&;]*[;&]?");
-    var query = search.replace(regex, "$1").replace(/&$/, '');
-
-    return (query.length > 2 ? query + "&" : "?") + (newval ? param + "=" + newval : '');
-}
 
 // 建立私聊連結
 function makePrivateRoom(a) {
@@ -51,16 +39,8 @@ window.onload = function () {
     var log = document.getElementById("log");
     var inRoomSymb = `<i class="fas fa-fish" style="margin-right:0.5em;color:#00798F"></i>`;
 
-    //取得聊天室ＩＤ	
-    var url = new URL(location.href);
-    var chatRoom = location.pathname.replace("/chat/", "")
 
-    //取得使用者ＩＤ
-    $("#my-id").text(url.searchParams.get('user'))
-    var user = $("#my-id").text()
-
-    //取得私訊與否
-    var privation = url.searchParams.get('private')
+    
     
     if (privation == "true" || chatRoom == "main") {
         if(privation == "true"){
@@ -68,23 +48,6 @@ window.onload = function () {
         }
         $("#del-room-btn").css("display", "none")
         $("#leave-room-btn").css("display", "none")
-    }
-
-    //取得個人聊天室列表
-    addRoomList()
-    function addRoomList() {
-        let list = []
-        $.ajax({
-            type: 'POST',
-            url: location.protocol + "/roomlist",
-            data: { "user": user },
-            async: false,
-            success: function (e) {
-                list = e.rooms.split(",")
-
-            }
-        })
-        showRoomList(list)
     }
 
     //拿取所有使用者列表
@@ -102,65 +65,7 @@ window.onload = function () {
         showUserList(list)
     }
 
-    //刪除房間（資料庫）
-    function delRoom(id) {
-        var xhr = new XMLHttpRequest();
-        $.ajax({
-            type: 'GET',
-            url: location.protocol + "/delete/" + id + "?user=" + user,
-            xhr: function () {
-                return xhr
-            },
-            success: function () {
-                swal("成功刪除", id + "聊天室含淚跟你說再見", "success")
-                window.location.href = xhr.responseURL
-            },
-            error: function () {
-                swal("出錯了！刪除失敗！", id + "聊天室陰魂不散～", "error")
-            }
-        })
-    }
-
-    //離開房間（刪除房間與自己的關聯＿資料庫）
-    function leaveRoom(id) {
-        var xhr = new XMLHttpRequest();
-        $.ajax({
-            type: 'GET',
-            url: location.protocol + "/leave/" + id + "?user=" + user,
-            xhr: function () {
-                return xhr
-            },
-            success: function () {
-                swal("您已退出聊天室", id + "裡的朋友們會想念你的", "success")
-                window.location.href = xhr.responseURL
-            },
-            error: function () {
-                swal("出錯了！", id + "聊天室不想與你分開～", "error")
-            }
-        })
-    }
-
-    //將聊天室清單印出區塊
-    function showRoomList(rooms) {
-        for (var key in rooms) {
-            var room = rooms[key]
-            var roomTitle = room;
-            if (rooms[key] == chatRoom) { //not work
-                roomTitle = inRoomSymb + roomTitle;
-                console.log(roomTitle)
-            }
-            if (room == "main") {     //是大廳就不用列出
-                $("#main-room").html("大廳")
-                continue
-            }
-            var roomBox = $(`<dt>
-                            <button onclick="goRoom(this)" class="div-ell mh20 room-box-text room-btn" value="${room}">${roomTitle} (<span>0</span>)</button>
-                        </dt>`);
-            $("#rooms dl").append(roomBox)
-            //這裡有機會可改進為不同class
-
-        }
-    }
+    
 
     //私訊通知＿toastr通知設定
     function showToastr(id){
@@ -337,7 +242,7 @@ window.onload = function () {
                 $("#rooms dt").each(function () {
                     let room_name = $(this).children().text()
                     room_name = room_name.substr(0, room_name.length - 4).replace(inRoomSymb, "")
-                    console.log(room_name)
+                    //console.log(room_name)
 
                     if (roomlist_states.includes(room_name)) {
                         $(this).children().children("span").text(rooms[room_name])
@@ -423,20 +328,7 @@ window.onload = function () {
         })
     })
 
-    /*刪除房間中介點*/
-    $("#del-room-btn").click(function () {
-        swal({
-            title: "刪除該聊天室？",
-            text: "該聊天室資料與聊天記錄會全部消失",
-            buttons: true,
-            dangerMode: true,
-        }).then((willDelete) => {
-            if (willDelete) {
-                delRoom(chatRoom)
-            }
-        })
 
-    })
 
     // 離開房間按鈕
     $("#leave-room-btn").click(function () {
