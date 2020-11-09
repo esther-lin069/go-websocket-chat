@@ -1,5 +1,6 @@
 var HOST = "http://localhost:8080"
 var ROOMS = []      //該使用者的聊天室名單
+var MEMBERS = []    //所有使用者名單
 
 //取得聊天室ＩＤ	
 var url = new URL(location.href)
@@ -11,7 +12,7 @@ var user = url.searchParams.get('user')
 //取得私訊與否
 var privation = url.searchParams.get('private')
 
-//列出url已有資訊
+//列出url已有資訊+房間操作功能
 var roomTitle = new Vue({
     el: '#room-title',
     data: {
@@ -23,6 +24,9 @@ var roomTitle = new Vue({
         },
         LeaveRoom(room_id){
             leaveRoom(room_id)
+        },
+        NewRoom: function(){
+            newRoom()
         }
     }
 })
@@ -50,9 +54,9 @@ var roomList = new Vue({
         axios
             .get(HOST + "/roomlist" + location.search)
             .then(function(e){
-                var list = e.data.rooms.split(',')
-                for( var i=0; i < list.length ;i++){
-                    var tmp = {'id': i, 'room_id':list[i], 'len': 0}
+                let list = e.data.rooms.split(',')
+                for( let i=0; i < list.length ;i++){
+                    let tmp = {'id': i, 'room_id':list[i], 'len': 0}
                     ROOMS.push(tmp)
                 }
             })
@@ -60,8 +64,35 @@ var roomList = new Vue({
     
 })
 
+//列出所有使用者
+var allUserList = new Vue({
+    el: '#all-users',
+    data: {
+        members: MEMBERS,
+        seen: false
+    },
+    mounted() {
+        axios
+            .get(HOST + "/userlist")
+            .then(function(e){
+                let list = e.data.users.split(',')
+                for( let i=0; i < list.length ;i++){
+                    let tmp = {'id': i, 'username':list[i]}
+                    MEMBERS.push(tmp)
+                }
+            })
+    },
 
-//other function
+})
+
+var onlineUserList = new Vue({
+    el: '#online-users',
+    data: {
+        seen: true
+    }
+})
+
+/*other function*/
 
 //替換參數
 function replaceQueryParam(param, newval, search) {
@@ -71,7 +102,16 @@ function replaceQueryParam(param, newval, search) {
     return (query.length > 2 ? query + "&" : "?") + (newval ? param + "=" + newval : '');
 }
 
-/*刪除房間中介點*/
+//判斷是否為超連結
+function isUrl(v){
+    var reg = /(http:\/\/|https:\/\/)((\w|=|\?|\.|\/|&|#|-)+)/g;
+    v = v.replace(reg, `<a href='$1$2' target="_blank">$1$2</a>`).replace(/\n/g, "<br />");
+    return v
+}
+
+/*房間操作 (ajax)*/
+
+//刪除房間中介點
 function swalDelRoom (room_id) {
     swal({
         title: "刪除該聊天室？",
@@ -121,6 +161,47 @@ function leaveRoom(id) {
         },
         error: function () {
             swal("出錯了！", id + "聊天室不想與你分開～", "error")
+        }
+    })
+}
+
+//新增房間
+function newRoom () {
+    swal({
+        title: "建立/前往 聊天室",
+        text: "聊天室id:",
+        content: "input",
+        buttons: {
+            cancel: true,
+            confirm: true,
+        },
+    }).then(function (inputValue) {
+        if (inputValue === null) return false;
+        if (inputValue === "") {
+            sweetAlert("哎呦……", "請輸入聊天室id", "error");
+            return false
+        }
+        if (inputValue.length > 30) {
+            sweetAlert("太…長……啦", "聊天室id為30字元內", "warning");
+            return false
+        }
+
+        makeNormalRoom(user, inputValue)
+    });
+}
+
+// 新建聊天室
+function makeNormalRoom(user, roomName) {
+    var xhr = new XMLHttpRequest();
+    $.ajax({
+        type: 'POST',
+        url: location.protocol + "/normalroom",
+        data: { "user": user, "roomName": roomName },
+        xhr: function () {
+            return xhr
+        },
+        success: function () {
+            window.location.href = xhr.responseURL
         }
     })
 }

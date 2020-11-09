@@ -163,9 +163,9 @@ SVG Icons - svgicons.sparkk.fr
     position: relative;
     z-index: 100;
 }
-.all-users {
+/* .all-users {
     display: none;
-}
+} */
 
 #rooms {
     overflow: auto;

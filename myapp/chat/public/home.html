@@ -41,18 +41,17 @@
     </div>
     <!-- left: room information -->
     <div id="room">
-        <div id="room-title" class="room-title div-ell">
-            <!-- 聊天室名稱 -->
-            <h1 class="title-text" id="room-id">{{ title }}</h1>
-            <!-- 刪除聊天室按鈕 -->
-            <button class="exit-btn" @click="DeleteRoom(title)" id="del-room-btn">刪除房間</button>
-            <!-- 離開聊天室按鈕 -->
-            <button class="exit-btn" @click="LeaveRoom(title)" id="leave-room-btn">退出房間</button>
-        </div>
-
-        <div id="rooms">
+        <div id="room-title" >
+            <div class="room-title div-ell">
+                <!-- 聊天室名稱 -->
+                <h1 class="title-text" id="room-id">{{ title }}</h1>
+                <!-- 刪除聊天室按鈕 -->
+                <button class="exit-btn" @click="DeleteRoom(title)" id="del-room-btn">刪除房間</button>
+                <!-- 離開聊天室按鈕 -->
+                <button class="exit-btn" @click="LeaveRoom" id="leave-room-btn">退出房間</button>
+            </div>
             <h5 class="title-text">聊天室列表
-                <button id="newRoom">
+                <button @click="NewRoom(title)" id="newRoom">
                     <svg class="svg-icon" viewBox="0 0 20 20">
                         <path
                             d="M14.613,10c0,0.23-0.188,0.419-0.419,0.419H10.42v3.774c0,0.23-0.189,0.42-0.42,0.42s-0.419-0.189-0.419-0.42v-3.774H5.806c-0.23,0-0.419-0.189-0.419-0.419s0.189-0.419,0.419-0.419h3.775V5.806c0-0.23,0.189-0.419,0.419-0.419s0.42,0.189,0.42,0.419v3.775h3.774C14.425,9.581,14.613,9.77,14.613,10 M17.969,10c0,4.401-3.567,7.969-7.969,7.969c-4.402,0-7.969-3.567-7.969-7.969c0-4.402,3.567-7.969,7.969-7.969C14.401,2.031,17.969,5.598,17.969,10 M17.13,10c0-3.932-3.198-7.13-7.13-7.13S2.87,6.068,2.87,10c0,3.933,3.198,7.13,7.13,7.13S17.13,13.933,17.13,10">
@@ -60,6 +59,9 @@
                     </svg>
                 </button>
             </h5>
+        </div>
+
+        <div id="rooms">
             <!-- 聊天室列表 -->
             <div id="roomList">
             <button id="main-room" @click="goToRoom('main')" class="mh20 room-box-text room-btn" value="main">大廳</button>
@@ -93,7 +95,7 @@
     </div>
     <!-- right: member list -->
     <div id="member">
-        <h5 class="title-text">
+        <h5 id="switch-all-online" class="title-text">
             <button class="list-btn" id="btn-now-users">在線列表</button><span> |</span>
             <button class="list-btn" id="btn-all-users" style="color:#827a7a;">所有使用者</button>
         </h5>
@@ -109,14 +111,32 @@
                 </div>
             </dt>
         </dl>
-        <dl id="member-list">
-            <!-- 該聊天室內的使用者清單 -->
-        </dl>
-        <div class="all-users">
+        <!-- 線上使用者區塊 -->
+        <div v-show="seen" id="online-users">
+            <dl id="online-member-list">
+                <!-- 該聊天室內的使用者清單 -->
+            </dl>
+        </div>
+        <!-- 所有使用者區塊 -->
+        <div v-show="seen" id="all-users" class="all-users">
             <label style="margin-left: 10%;">搜尋</label><input type="text" class="w3-input w3-border w3-round"
                 id="user-search">
-            <dl id="all-member-list">
-
+            <dl>
+                <dt 
+                v-for="(member, index) in members"
+                :id="member.username"
+                :key="index">
+                    <div class="card">
+                        <div class="box">
+                        <span style="color:#00798F;margin-right:8px;">
+                            <i class="fa fa-user"></i>
+                        </span>
+                        <a onclick="makePrivateRoom(this)" class="pchat-btn" role="button" href="#" data-id="${element}">
+                            <i class="fa fa-comment-dots"></i></a>
+                        <span class="box-text">{{ member.username }}</span> 
+                        </div>
+                    </div>
+                </dt>
             </dl>
         </div>
 

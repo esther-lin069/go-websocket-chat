@@ -17,30 +17,13 @@ function makePrivateRoom(a) {
     })
 }
 
-// 新建聊天室
-function makeNormalRoom(user, roomName) {
-    var xhr = new XMLHttpRequest();
-    $.ajax({
-        type: 'POST',
-        url: location.protocol + "/normalroom",
-        data: { "user": user, "roomName": roomName },
-        xhr: function () {
-            return xhr
-        },
-        success: function () {
-            window.location.href = xhr.responseURL
-        }
-    })
-}
+
 
 window.onload = function () {
     var conn;
     var msg = document.getElementById("msg");
     var log = document.getElementById("log");
     var inRoomSymb = `<i class="fas fa-fish" style="margin-right:0.5em;color:#00798F"></i>`;
-
-
-    
     
     if (privation == "true" || chatRoom == "main") {
         if(privation == "true"){
@@ -48,21 +31,6 @@ window.onload = function () {
         }
         $("#del-room-btn").css("display", "none")
         $("#leave-room-btn").css("display", "none")
-    }
-
-    //拿取所有使用者列表
-    function getUserList() {
-        let list = []
-        $.ajax({
-            type: 'GET',
-            url: location.protocol + "/userlist",
-            async: false,
-            success: function (e) {
-                list = e.users.split(",")
-            }
-        })
-        //顯示
-        showUserList(list)
     }
 
     
@@ -88,30 +56,6 @@ window.onload = function () {
         }
         toastr["info"]("您有來自"+id+"的私訊", "通知");
     }
-    
-
-    //列出所有使用者名單
-    function showUserList(members) {
-        members.forEach(element => {
-            if (element == user) {  //是自己的話就不用列出
-                return
-            }
-            var box = $(`<dt>
-                    <div class="card">
-                        <div class="box">
-                        <span style="color:#00798F;margin-right:8px;">
-                            <i class="fa fa-user"></i>
-                        </span>
-                        <a onclick="makePrivateRoom(this)" class="pchat-btn" role="button" href="#" data-id="${element}">
-                            <i class="fa fa-comment-dots"></i></a>
-                        <span class="box-text">${element}</span> 
-                        </div>
-                    </div>
-                </dt>`)
-
-            $("#all-member-list").append(box);
-        })
-    }
 
     //將聊天訊息放入聊天區塊
     function appendLog(item) {
@@ -122,12 +66,7 @@ window.onload = function () {
             log.scrollTop = log.scrollHeight - log.clientHeight;
         }
     }
-    //判斷是否為超連結
-    function isUrl(v){
-        var reg = /(http:\/\/|https:\/\/)((\w|=|\?|\.|\/|&|#|-)+)/g;
-        v = v.replace(reg, `<a href='$1$2' target="_blank">$1$2</a>`).replace(/\n/g, "<br />");
-        return v
-    }
+
 
     //傳送輸入框訊息to ws
     document.getElementById("form").onsubmit = function () {
@@ -191,7 +130,7 @@ window.onload = function () {
 
             //系統hint 使用者名單
             if (chat.type == "H") {
-                $("#member-list").empty()
+                $("#online-member-list").empty()
                 info = JSON.parse(chat.content)
 
                 if (chatRoom != info.room_info) {
@@ -209,14 +148,13 @@ window.onload = function () {
                                 <span style="color:#00798F;margin-right:8px;">
                                     <i class="fa fa-user"></i>
                                 </span>
-                                <a onclick="makePrivateRoom(this)" id="WP-${element}" class="pchat-btn" role="button" href="#" data-id="${element}">
-                                    <i class="fa fa-comment-dots"></i></a>
                                 <span class="box-text">${element}</span> 
                                 </div>
                             </div>
                         </dt>`)
 
-                    $("#member-list").append(box)
+                    $("#online-member-list").append(box)
+
 
                 });
             }
@@ -278,45 +216,21 @@ window.onload = function () {
     
     }
 
-    //建立聊天室
-    $("#newRoom").click(function () {
-        swal({
-            title: "建立/前往 聊天室",
-            text: "聊天室id:",
-            content: "input",
-            buttons: {
-                cancel: true,
-                confirm: true,
-            },
-        }).then(function (inputValue) {
-            if (inputValue === null) return false;
-            if (inputValue === "") {
-                sweetAlert("哎呦……", "請輸入聊天室id", "error");
-                return false
-            }
-            if (inputValue.length > 30) {
-                sweetAlert("太…長……啦", "聊天室id為30字元內", "warning");
-                return false
-            }
-
-            makeNormalRoom(user, inputValue)
-        });
-    })
+    
 
     /*使用者清單（all/now）切換*/
     $("#btn-all-users").click(function () {
         $("#btn-now-users").css("color", "#827a7a")
         $("#btn-all-users").css("color", "#413636")
-        $("#member-list").css("display", "none")
+        $("#online-member-list").css("display", "none")
         $(".all-users").css("display", "block")
-        $("#all-member-list").empty()
-        getUserList();
+        //$("#all-member-list").empty()
     })
 
     $("#btn-now-users").click(function () {
         $("#btn-now-users").css("color", "#413636")
         $("#btn-all-users").css("color", "#827a7a")
-        $("#member-list").css("display", "block")
+        $("#online-member-list").css("display", "block")
         $(".all-users").css("display", "none")
     })
 
@@ -326,13 +240,6 @@ window.onload = function () {
         $("#all-member-list dt").filter(function () {
             $(this).toggle($(this).text().indexOf(value) > -1)
         })
-    })
-
-
-
-    // 離開房間按鈕
-    $("#leave-room-btn").click(function () {
-        leaveRoom(chatRoom)
     })
 
 
