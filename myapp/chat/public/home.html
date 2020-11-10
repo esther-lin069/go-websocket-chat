@@ -26,9 +26,8 @@
     <link rel="stylesheet" href="../asset/css/home.css">
 
     <!-- 自訂js -->
-    <script src="../asset/js/home.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-    <!-- <script src="../asset/js/ws.js"></script> -->
+
 
 </head>
 <body>
@@ -117,7 +116,19 @@
         <!-- 線上使用者區塊 -->
         <div v-show="seen" id="online-users">
             <dl id="online-member-list">
-                <!-- 該聊天室內的使用者清單 -->
+                <dt 
+                v-for="(member, index) in o_members"
+                :id="member.username"
+                :key="index">
+                    <div class="card">
+                        <div class="box">
+                        <span style="color:#00798F;margin-right:8px;">
+                            <i class="fa fa-user"></i>
+                        </span>
+                        <span class="box-text">{{ member.username }}</span> 
+                        </div>
+                    </div>
+                </dt>
             </dl>
         </div>
         <!-- 所有使用者區塊 -->

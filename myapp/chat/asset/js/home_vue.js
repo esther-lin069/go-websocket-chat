@@ -1,6 +1,7 @@
 var HOST = "http://localhost:8080"
 var ROOMS = []      //該使用者的聊天室名單
 var MEMBERS = []    //所有使用者名單
+var ONLINE = []
 var RECIPIENT = ''  //私聊接收者
 
 //取得聊天室ＩＤ	
@@ -110,11 +111,17 @@ var allUserList = new Vue({
 
 })
 
+//列出在線使用者
 var onlineUserList = new Vue({
     el: '#online-users',
     data: {
         seen: true,
         o_members: [],
+    },
+    methods: {
+        changeOnline: function(list){
+            this.o_members = list
+        }
     }
 })
 
@@ -143,9 +150,115 @@ var switchAllOnline = new Vue({
 
 /*ws*/
 var conn;
-var msg = document.getElementById("msg");
 var log = document.getElementById("log");
 var inRoomSymb = `<i class="fas fa-fish" style="margin-right:0.5em;color:#00798F"></i>`;
+
+//WS連線：接收廣播訊息
+if (window["WebSocket"]) {
+    conn = new ReconnectingWebSocket("ws://" + document.location.host + "/ws" + location.pathname + location.search);
+    conn.debug = true;
+    conn.timeoutInterval = 3600;
+    conn.onclose = function (evt) {
+        var item = document.createElement("div");
+        item.innerHTML = "<b>Connection closed.</b>";
+        appendLog(item);
+    };
+    conn.onmessage = function (evt) {
+        var messages = evt.data.split('\n');
+        for (var i = 0; i < messages.length; i++) {
+            HandleMessage (messages[i])
+        }
+    }
+} else {
+    var item = document.createElement("div");
+    item.innerHTML = "<b>Your browser does not support WebSockets.</b>";
+    appendLog(item);
+}
+
+//處理訊息
+function HandleMessage (message){
+    var item = document.createElement('div');
+    var chat = JSON.parse(message);
+    var chatTime = new Date(chat.time).toLocaleString('zh-TW');
+    //判斷是否為系統訊息
+    if (chat.sender == "SYS") {
+
+        //系統hint 使用者名單
+        if (chat.type == "H") {
+            info = JSON.parse(chat.content)
+            ONLINE = []                  //清空原來的在線人員列表
+
+            if (CHATROOM != info.room_info) {
+                alert("聊天室位置出錯!" + CHATROOM + info.room_info);
+            }
+
+            var members = info.user_info.split(",")
+            for( let i=0; i < members.length ;i++){
+                if(members[i] == USER)   //是自己的話不用列出
+                    continue
+
+                let tmp = {'username':members[i]}                
+                ONLINE.push(tmp)
+            }
+
+            // 更改並列出目前在線名單            
+            onlineUserList.changeOnline(ONLINE)
+
+        }
+        else if (chat.type == "WP") {
+            if (!CHATROOM.includes(chat.content) && PRIVATION != true){
+                showToastr(chat.content)
+            }
+            
+        }
+        //系統info
+        else {
+            info = JSON.parse(chat.content)
+            rooms = JSON.parse(info.room_info)  //聊天室名單對應人數
+            users = info.user_info.split(',')   //聊天室所有在線人員
+
+            /*聊天室人數變更*/
+            let roomlist_states = (Object.keys(rooms))
+
+            for (ROOM of ROOMS) {
+                if (roomlist_states.includes(ROOM.room_id)) {
+                    ROOM.len = rooms[ROOM.room_id]
+                }
+            }
+
+        }
+        //系統訊息ex.ＸＸＸ離開聊天室
+        item.innerHTML =  `<div class="system-text"><label>` + info.text + `</label></div>`
+    }
+    else {
+        //判別內容是否包含鏈結
+        var text = isUrl(chat.content)
+
+        //來自其他用戶或使用者的廣播消息
+        if (chat.type == "A") {
+
+            //是私訊的話把全域廣播擋下來
+            if (PRIVATION == "true"){ 
+                return
+            }
+
+            item.innerHTML =  `<div class="chat-text">\
+                <label class="sm-text"><span style="font-weight: 1000;">`+ chat.sender +`</span> 於 ` + chatTime + `廣播</lable><br>\
+                <label class="bro-text">&nbsp;&nbsp;` + text + `</label>\
+            </div>`
+        }
+        //一般的頻道消息
+        else {
+            item.innerHTML =  `<div class="chat-text">\
+                <label class="sm-text"><span style="font-weight: 1000;">` + chat.sender + `</span> 於` + chatTime + `</lable><br>\
+                <label class="md-text">&nbsp;&nbsp;` + text + `</label>\
+            </div>`
+        }
+    }
+    //打印訊息            
+    appendLog(item);
+
+}
 
 var chatForm = new Vue({
     el: '#form',
@@ -166,8 +279,8 @@ var chatForm = new Vue({
                 this.type = "P"
             }
             jstr = JSON.stringify({ sender: USER, roomId: CHATROOM, recipient: RECIPIENT, type: this.type, content: content, time: Date.now() });
-            //conn.send(jstr)
-            console.log(jstr)
+            conn.send(jstr)
+
             return false
         }
     }

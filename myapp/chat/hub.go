@@ -104,9 +104,9 @@ func (h *Hub) run() {
 
 			/*發送至該聊天室*/
 			for _, con := range conns {
-				if con.id == client.id {
-					continue
-				}
+				// if con.id == client.id {
+				// 	continue
+				// }
 				con.send <- message
 
 			}
