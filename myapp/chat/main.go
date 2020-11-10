@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"net/http"
 	"strings"
 
@@ -8,6 +9,7 @@ import (
 )
 
 func serveHome(ctx *gin.Context) {
+	fmt.Println("HOMEEEEE")
 	//log.Println(r.URL)
 	if ctx.Query("user") == "" {
 		ctx.Redirect(http.StatusMovedPermanently, "/login") //在這裡加私訊驗證
@@ -75,8 +77,7 @@ func askUserList(hub *Hub, ctx *gin.Context) {
 func doDelRoom(ctx *gin.Context) {
 	roomId := ctx.Param("roomId")
 	DelRoom(roomId)
-	ctx.Redirect(http.StatusMovedPermanently, "/chat/main/?user="+ctx.Query("user")+"&private=false") //進入聊天室
-
+	ctx.Redirect(http.StatusFound, "/chat/main/?user="+ctx.Query("user")+"&private=false") //進入聊天室
 }
 
 //退出房間
@@ -84,7 +85,7 @@ func doLeaveRoom(ctx *gin.Context) {
 	roomId := ctx.Param("roomId")
 	user := ctx.Query("user")
 	LeaveRoom(roomId, user)
-	ctx.Redirect(http.StatusMovedPermanently, "/chat/main/?user="+ctx.Query("user")+"&private=false") //進入聊天室
+	ctx.Redirect(http.StatusFound, "/chat/main/?user="+user+"&private=false") //進入聊天室
 }
 
 func main() {
@@ -100,10 +101,6 @@ func main() {
 	router.LoadHTMLFiles("public/home.html", "public/login.html")
 	router.Static("/asset", "./asset")
 
-	router.GET("/login", func(ctx *gin.Context) {
-		ctx.HTML(http.StatusOK, "login.html", nil)
-	})
-
 	router.POST("/login", login)
 
 	router.GET("/roomlist", askRoomList)
@@ -111,13 +108,16 @@ func main() {
 		askUserList(hub, ctx)
 	})
 
-	router.GET("/chat/:roomId", serveHome)
 	router.GET("/delete/:roomId", doDelRoom)
 	router.GET("/leave/:roomId", doLeaveRoom)
+	router.GET("/chat/:roomId", serveHome)
 
 	router.POST("/privateroom", makePrivateRoom)
 	router.POST("/normalroom", makeNormalRoom)
 
+	router.GET("/login", func(ctx *gin.Context) {
+		ctx.HTML(http.StatusOK, "login.html", nil)
+	})
 	router.GET("/ws/chat/:roomId", func(ctx *gin.Context) {
 		serveWs(hub, ctx)
 	})

@@ -23,11 +23,11 @@ var roomTitle = new Vue({
         seen_del: true,
     },
     methods: {
-        DeleteRoom(room_id){
-            swalDelRoom(room_id)
+        DeleteRoom: function(){
+            swalDelRoom(this.title)
         },
-        LeaveRoom(room_id){
-            leaveRoom(room_id)
+        LeaveRoom: function(){
+            leaveRoom(this.title)
         },
         NewRoom: function(){
             newRoom()
@@ -372,40 +372,29 @@ function swalDelRoom (room_id) {
 
 //刪除房間（資料庫）
 function delRoom(id) {
-    var xhr = new XMLHttpRequest();
-    $.ajax({
-        type: 'GET',
-        url: location.protocol + "/delete/" + id + "?user=" + USER,
-        xhr: function () {
-            return xhr
-        },
-        success: function () {
-            swal("成功刪除", id + "聊天室含淚跟你說再見", "success")
-            window.location.href = xhr.responseURL
-        },
-        error: function () {
-            swal("出錯了！刪除失敗！", id + "聊天室陰魂不散～", "error")
-        }
+    axios({
+        method: 'get',
+        baseURL: HOST,
+        url: "/delete/" + id + "?user=" + USER,
+    }).then((res)=>{
+        swal("成功刪除", id + "聊天室含淚跟你說再見", "success")
+        window.location = res.request.responseURL
+    }).catch((err)=>{
+        swal(err + "出錯了！刪除失敗！", id + "聊天室陰魂不散～", "error")
     })
 }
 
 //離開房間（刪除房間與自己的關聯＿資料庫）
 function leaveRoom(id) {
-    var xhr = new XMLHttpRequest();
-    $.ajax({
-        type: 'GET',
-        url: location.protocol + "/leave/" + id + "?user=" + USER,
-        xhr: function () {
-            return xhr
-        },
-        success: function () {
-            swal("您已退出聊天室", id + "裡的朋友們會想念你的", "success")
-            setTimeout(()=>{window.location.href = xhr.responseURL}, 1000)
-            
-        },
-        error: function () {
-            swal("出錯了！", id + "聊天室不想與你分開～", "error")
-        }
+    axios({
+        method: 'get',
+        baseURL: HOST,
+        url: "/leave/" + id + "?user=" + USER,
+    }).then((res)=>{
+        swal("您已退出聊天室", id + "裡的朋友們會想念你的", "success")
+        setTimeout(()=>{window.location.href = res.request.responseURL}, 1000)
+    }).catch((err)=>{
+        swal("出錯了！", id + "聊天室不想與你分開～", "error")
     })
 }
 
