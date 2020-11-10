@@ -1,61 +1,11 @@
 
-// 建立私聊連結
-function makePrivateRoom(a) {
-    var user = $("#my-id").text();
-    var pusers = [user, $(a).data("id")].sort();
-    var xhr = new XMLHttpRequest();
-    $.ajax({
-        type: 'POST',
-        url: location.protocol + "/privateroom",
-        data: { "user": user, "roomName": pusers[0] + "-" + pusers[1] },
-        xhr: function () {
-            return xhr
-        },
-        success: function () {
-            window.location.href = xhr.responseURL
-        }
-    })
-}
-
-
-
 window.onload = function () {
     var conn;
     var msg = document.getElementById("msg");
     var log = document.getElementById("log");
     var inRoomSymb = `<i class="fas fa-fish" style="margin-right:0.5em;color:#00798F"></i>`;
     
-    if (privation == "true" || chatRoom == "main") {
-        if(privation == "true"){
-            $("#room-id").text("私聊：" + chatRoom)
-        }
-        $("#del-room-btn").css("display", "none")
-        $("#leave-room-btn").css("display", "none")
-    }
-
     
-
-    //私訊通知＿toastr通知設定
-    function showToastr(id){
-        toastr.options = {
-            "closeButton": false,
-            "debug": false,
-            "newestOnTop": false,
-            "progressBar": false,
-            "positionClass": "toast-bottom-right",
-            "preventDuplicates": false,
-            "onclick": null,
-            "showDuration": "300",
-            "hideDuration": "1000",
-            "timeOut": "3000",
-            "extendedTimeOut": "1000",
-            "showEasing": "swing",
-            "hideEasing": "linear",
-            "showMethod": "fadeIn",
-            "hideMethod": "fadeOut"
-        }
-        toastr["info"]("您有來自"+id+"的私訊", "通知");
-    }
 
     //將聊天訊息放入聊天區塊
     function appendLog(item) {
@@ -82,10 +32,10 @@ window.onload = function () {
         if ($("#msg-type").val() == "broadcast") {
             type = "A"
         }
-        if (privation == "true") {
+        if (PRIVATION == "true") {
             type = "P"
-            let members = chatRoom.split("-")
-            if (members[0] == user) {
+            let members = CHATROOM.split("-")
+            if (members[0] == USER) {
                 recipient = members[1]
             }
             else {
@@ -93,7 +43,7 @@ window.onload = function () {
             }
 
         }
-        jstr = JSON.stringify({ sender: user, roomId: chatRoom, recipient: recipient, type: type, content: msg.value, time: Date.now() });
+        jstr = JSON.stringify({ sender: USER, roomId: CHATROOM, recipient: recipient, type: type, content: msg.value, time: Date.now() });
         conn.send(jstr)
         msg.value = "";
         return false;
@@ -133,12 +83,12 @@ window.onload = function () {
                 $("#online-member-list").empty()
                 info = JSON.parse(chat.content)
 
-                if (chatRoom != info.room_info) {
-                    alert("聊天室位置出錯!" + chatRoom + info.room_info);
+                if (CHATROOM != info.room_info) {
+                    alert("聊天室位置出錯!" + CHATROOM + info.room_info);
                 } //聊天室名稱
                 var members = info.user_info.split(",")
                 members.forEach(element => {
-                    if (element == user) {  //是自己的話就不用列出
+                    if (element == USER) {  //是自己的話就不用列出
                         return
                     }
                     //在線使用者名單
@@ -159,7 +109,7 @@ window.onload = function () {
                 });
             }
             else if (chat.type == "WP") {
-                if (!chatRoom.includes(chat.content) && privation != true){
+                if (!CHATROOM.includes(chat.content) && PRIVATION != true){
                     showToastr(chat.content)
                 }
                 
@@ -194,7 +144,7 @@ window.onload = function () {
         else {
             var text = isUrl(chat.content)
             if (chat.type == "A") {
-                if (privation == "true"){ //是私訊的話把全域廣播擋下來
+                if (PRIVATION == "true"){ //是私訊的話把全域廣播擋下來
                     return
                 }
                 var bro_content = text;
@@ -215,32 +165,6 @@ window.onload = function () {
         appendLog(item);
     
     }
-
-    
-
-    /*使用者清單（all/now）切換*/
-    $("#btn-all-users").click(function () {
-        $("#btn-now-users").css("color", "#827a7a")
-        $("#btn-all-users").css("color", "#413636")
-        $("#online-member-list").css("display", "none")
-        $(".all-users").css("display", "block")
-        //$("#all-member-list").empty()
-    })
-
-    $("#btn-now-users").click(function () {
-        $("#btn-now-users").css("color", "#413636")
-        $("#btn-all-users").css("color", "#827a7a")
-        $("#online-member-list").css("display", "block")
-        $(".all-users").css("display", "none")
-    })
-
-    // 從所有使用者中搜尋
-    $("#user-search").on("keyup", function () {
-        let value = $(this).val();
-        $("#all-member-list dt").filter(function () {
-            $(this).toggle($(this).text().indexOf(value) > -1)
-        })
-    })
 
 
 };

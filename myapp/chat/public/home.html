@@ -46,9 +46,9 @@
                 <!-- 聊天室名稱 -->
                 <h1 class="title-text" id="room-id">{{ title }}</h1>
                 <!-- 刪除聊天室按鈕 -->
-                <button class="exit-btn" @click="DeleteRoom(title)" id="del-room-btn">刪除房間</button>
+                <button class="exit-btn" v-show="seen_del" @click="DeleteRoom(title)" id="del-room-btn">刪除房間</button>
                 <!-- 離開聊天室按鈕 -->
-                <button class="exit-btn" @click="LeaveRoom" id="leave-room-btn">退出房間</button>
+                <button class="exit-btn" v-show="seen_leave" @click="LeaveRoom" id="leave-room-btn">退出房間</button>
             </div>
             <h5 class="title-text">聊天室列表
                 <button @click="NewRoom(title)" id="newRoom">
@@ -96,8 +96,8 @@
     <!-- right: member list -->
     <div id="member">
         <h5 id="switch-all-online" class="title-text">
-            <button class="list-btn" id="btn-now-users">在線列表</button><span> |</span>
-            <button class="list-btn" id="btn-all-users" style="color:#827a7a;">所有使用者</button>
+            <button class="list-btn" @click="sOnline" :style="{ color: onlineColor }" id="btn-now-users">在線列表</button><span> |</span>
+            <button class="list-btn" @click="sAll" :style="{ color: allColor }" id="btn-all-users" style="color:#827a7a;">所有使用者</button>
         </h5>
         <dl>
             <dt>
@@ -119,11 +119,11 @@
         </div>
         <!-- 所有使用者區塊 -->
         <div v-show="seen" id="all-users" class="all-users">
-            <label style="margin-left: 10%;">搜尋</label><input type="text" class="w3-input w3-border w3-round"
-                id="user-search">
+            <label style="margin-left: 10%;">搜尋</label>
+            <input v-model="search" type="text" class="w3-input w3-border w3-round" id="user-search">
             <dl>
                 <dt 
-                v-for="(member, index) in members"
+                v-for="(member, index) in filterd"
                 :id="member.username"
                 :key="index">
                     <div class="card">
@@ -131,7 +131,7 @@
                         <span style="color:#00798F;margin-right:8px;">
                             <i class="fa fa-user"></i>
                         </span>
-                        <a onclick="makePrivateRoom(this)" class="pchat-btn" role="button" href="#" data-id="${element}">
+                        <a @click="privateChat(member.username)" class="pchat-btn" role="button" href="#" data-id="${element}">
                             <i class="fa fa-comment-dots"></i></a>
                         <span class="box-text">{{ member.username }}</span> 
                         </div>

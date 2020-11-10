@@ -4,19 +4,21 @@ var MEMBERS = []    //所有使用者名單
 
 //取得聊天室ＩＤ	
 var url = new URL(location.href)
-var chatRoom = location.pathname.replace("/chat/", "")
+var CHATROOM = location.pathname.replace("/chat/", "")
 
 //取得使用者ＩＤ
-var user = url.searchParams.get('user')
+var USER = url.searchParams.get('user')
 
 //取得私訊與否
-var privation = url.searchParams.get('private')
+var PRIVATION = url.searchParams.get('private')
 
 //列出url已有資訊+房間操作功能
 var roomTitle = new Vue({
     el: '#room-title',
     data: {
-        title: chatRoom
+        title: CHATROOM,
+        seen_leave: true,
+        seen_del: true,
     },
     methods: {
         DeleteRoom(room_id){
@@ -34,7 +36,7 @@ var roomTitle = new Vue({
 var myUserBlock = new Vue({
     el: '#myUserBlock',
     data: {
-        username: user
+        username: USER
     }
 })
 
@@ -69,7 +71,22 @@ var allUserList = new Vue({
     el: '#all-users',
     data: {
         members: MEMBERS,
-        seen: false
+        seen: false,
+        search: ''
+    },
+    methods: {
+        privateChat(toWho){
+            let sort_users = [USER, toWho].sort();
+                makePrivateRoom(sort_users)
+        }
+    },
+    computed: {
+        filterd: function(){
+            var s = this.search.toLowerCase();
+            return(s.trim() !== '') ?
+                this.members.filter(function(d){ return d.username.toLowerCase().indexOf(s) > -1; }) :
+                this.members
+        }
     },
     mounted() {
         axios
@@ -77,6 +94,9 @@ var allUserList = new Vue({
             .then(function(e){
                 let list = e.data.users.split(',')
                 for( let i=0; i < list.length ;i++){
+                    if(list[i] == USER)   //是自己的話不用列出
+                        continue
+
                     let tmp = {'id': i, 'username':list[i]}
                     MEMBERS.push(tmp)
                 }
@@ -88,11 +108,43 @@ var allUserList = new Vue({
 var onlineUserList = new Vue({
     el: '#online-users',
     data: {
-        seen: true
+        seen: true,
+        o_members: [],
+    }
+})
+
+var switchAllOnline = new Vue({
+    el: '#switch-all-online',
+    data: {
+        onlineColor: '#413636',
+        allColor: '#827a7a',
+    },
+    methods: {
+        sOnline: function(){
+            onlineUserList.$data.seen = true
+            allUserList.$data.seen = false
+            this.onlineColor = '#413636'
+            this.allColor = '#827a7a'
+        },
+        sAll: function(){
+            onlineUserList.$data.seen = false
+            allUserList.$data.seen = true
+            this.onlineColor = '#827a7a'
+            this.allColor = '#413636'
+        }
     }
 })
 
 /*other function*/
+
+//判斷是否為大廳和私聊
+if (PRIVATION == "true" || CHATROOM == "main") {
+    if(PRIVATION == "true"){
+        roomTitle.$data.title = "私聊：" + CHATROOM
+    }
+    roomTitle.$data.seen_leave = false
+    roomTitle.$data.seen_del = false
+}
 
 //替換參數
 function replaceQueryParam(param, newval, search) {
@@ -107,6 +159,28 @@ function isUrl(v){
     var reg = /(http:\/\/|https:\/\/)((\w|=|\?|\.|\/|&|#|-)+)/g;
     v = v.replace(reg, `<a href='$1$2' target="_blank">$1$2</a>`).replace(/\n/g, "<br />");
     return v
+}
+
+//私訊通知＿toastr通知設定
+function showToastr(id){
+    toastr.options = {
+        "closeButton": false,
+        "debug": false,
+        "newestOnTop": false,
+        "progressBar": false,
+        "positionClass": "toast-bottom-right",
+        "preventDuplicates": false,
+        "onclick": null,
+        "showDuration": "300",
+        "hideDuration": "1000",
+        "timeOut": "3000",
+        "extendedTimeOut": "1000",
+        "showEasing": "swing",
+        "hideEasing": "linear",
+        "showMethod": "fadeIn",
+        "hideMethod": "fadeOut"
+    }
+    toastr["info"]("您有來自"+id+"的私訊", "通知");
 }
 
 /*房間操作 (ajax)*/
@@ -131,7 +205,7 @@ function delRoom(id) {
     var xhr = new XMLHttpRequest();
     $.ajax({
         type: 'GET',
-        url: location.protocol + "/delete/" + id + "?user=" + user,
+        url: location.protocol + "/delete/" + id + "?user=" + USER,
         xhr: function () {
             return xhr
         },
@@ -150,7 +224,7 @@ function leaveRoom(id) {
     var xhr = new XMLHttpRequest();
     $.ajax({
         type: 'GET',
-        url: location.protocol + "/leave/" + id + "?user=" + user,
+        url: location.protocol + "/leave/" + id + "?user=" + USER,
         xhr: function () {
             return xhr
         },
@@ -186,17 +260,33 @@ function newRoom () {
             return false
         }
 
-        makeNormalRoom(user, inputValue)
+        makeNormalRoom(inputValue)
     });
 }
 
 // 新建聊天室
-function makeNormalRoom(user, roomName) {
+function makeNormalRoom(roomName) {
     var xhr = new XMLHttpRequest();
     $.ajax({
         type: 'POST',
         url: location.protocol + "/normalroom",
-        data: { "user": user, "roomName": roomName },
+        data: { "user": USER, "roomName": roomName },
+        xhr: function () {
+            return xhr
+        },
+        success: function () {
+            window.location.href = xhr.responseURL
+        }
+    })
+}
+
+// 建立私聊連結
+function makePrivateRoom(s) {
+    var xhr = new XMLHttpRequest();
+    $.ajax({
+        type: 'POST',
+        url: location.protocol + "/privateroom",
+        data: { "user": USER, "roomName": s[0] + "-" + s[1] },
         xhr: function () {
             return xhr
         },
