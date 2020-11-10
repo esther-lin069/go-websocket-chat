@@ -1,6 +1,7 @@
 var HOST = "http://localhost:8080"
 var ROOMS = []      //該使用者的聊天室名單
 var MEMBERS = []    //所有使用者名單
+var RECIPIENT = ''  //私聊接收者
 
 //取得聊天室ＩＤ	
 var url = new URL(location.href)
@@ -50,6 +51,9 @@ var roomList = new Vue({
         goToRoom(room_id){
             let search = replaceQueryParam('private', 'false', location.search)
             window.location.href = HOST + "/chat/" + room_id + search
+        },
+        inRoom(room_id){
+            return (room_id === CHATROOM) ? inRoomSymb : '' 
         }
     },
     mounted() {
@@ -81,6 +85,7 @@ var allUserList = new Vue({
         }
     },
     computed: {
+        // 搜尋並返回結果
         filterd: function(){
             var s = this.search.toLowerCase();
             return(s.trim() !== '') ?
@@ -120,6 +125,7 @@ var switchAllOnline = new Vue({
         allColor: '#827a7a',
     },
     methods: {
+        // 切換按鈕使用狀態與區塊顯示判斷
         sOnline: function(){
             onlineUserList.$data.seen = true
             allUserList.$data.seen = false
@@ -135,12 +141,53 @@ var switchAllOnline = new Vue({
     }
 })
 
+/*ws*/
+var conn;
+var msg = document.getElementById("msg");
+var log = document.getElementById("log");
+var inRoomSymb = `<i class="fas fa-fish" style="margin-right:0.5em;color:#00798F"></i>`;
+
+var chatForm = new Vue({
+    el: '#form',
+    data: {
+        msg : '',
+        type : 'N'
+    },
+    methods: {
+        sendMsg: function(){
+            var content = this.msg
+            if (!conn) {
+                return false 
+            }
+            if (this.msg = ''){
+                return false
+            }
+            if (PRIVATION == "true"){
+                this.type = "P"
+            }
+            jstr = JSON.stringify({ sender: USER, roomId: CHATROOM, recipient: RECIPIENT, type: this.type, content: content, time: Date.now() });
+            //conn.send(jstr)
+            console.log(jstr)
+            return false
+        }
+    }
+})
+
+
 /*other function*/
 
 //判斷是否為大廳和私聊
 if (PRIVATION == "true" || CHATROOM == "main") {
     if(PRIVATION == "true"){
         roomTitle.$data.title = "私聊：" + CHATROOM
+
+        let members = CHATROOM.split("-")
+        if (members[0] == USER) {
+            RECIPIENT = members[1]
+        }
+        else {
+            RECIPIENT = members[0]
+        }
     }
     roomTitle.$data.seen_leave = false
     roomTitle.$data.seen_del = false
@@ -159,6 +206,16 @@ function isUrl(v){
     var reg = /(http:\/\/|https:\/\/)((\w|=|\?|\.|\/|&|#|-)+)/g;
     v = v.replace(reg, `<a href='$1$2' target="_blank">$1$2</a>`).replace(/\n/g, "<br />");
     return v
+}
+
+//將聊天訊息放入聊天區塊
+function appendLog(item) {
+    var doScroll = log.scrollTop > log.scrollHeight - log.clientHeight - 1;
+    log.appendChild(item);
+
+    if (doScroll) {
+        log.scrollTop = log.scrollHeight - log.clientHeight;
+    }
 }
 
 //私訊通知＿toastr通知設定

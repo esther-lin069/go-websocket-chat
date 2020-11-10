@@ -1,54 +1,6 @@
 
 window.onload = function () {
-    var conn;
-    var msg = document.getElementById("msg");
-    var log = document.getElementById("log");
-    var inRoomSymb = `<i class="fas fa-fish" style="margin-right:0.5em;color:#00798F"></i>`;
     
-    
-
-    //將聊天訊息放入聊天區塊
-    function appendLog(item) {
-        var doScroll = log.scrollTop > log.scrollHeight - log.clientHeight - 1;
-        //log.appendChild(item);
-        $("#log").append(item)
-        if (doScroll) {
-            log.scrollTop = log.scrollHeight - log.clientHeight;
-        }
-    }
-
-
-    //傳送輸入框訊息to ws
-    document.getElementById("form").onsubmit = function () {
-        var type = "N"
-        var recipient = ""
-        if (!conn) {
-            return false;
-        }
-        if (!msg.value) {
-            return false;
-        }
-
-        if ($("#msg-type").val() == "broadcast") {
-            type = "A"
-        }
-        if (PRIVATION == "true") {
-            type = "P"
-            let members = CHATROOM.split("-")
-            if (members[0] == USER) {
-                recipient = members[1]
-            }
-            else {
-                recipient = members[0]
-            }
-
-        }
-        jstr = JSON.stringify({ sender: USER, roomId: CHATROOM, recipient: recipient, type: type, content: msg.value, time: Date.now() });
-        conn.send(jstr)
-        msg.value = "";
-        return false;
-    };
-
     //WS連線：接收廣播訊息
     if (window["WebSocket"]) {
         conn = new ReconnectingWebSocket("ws://" + document.location.host + "/ws" + location.pathname + location.search);
@@ -73,6 +25,7 @@ window.onload = function () {
 
     //處理訊息
     function HandleMessage (message){
+        var item = document.createElement('div');
         chat = JSON.parse(message);
         chatTime = new Date(chat.time).toLocaleString('zh-TW');
         //判斷是否為系統訊息
@@ -129,7 +82,7 @@ window.onload = function () {
 
                 $("#rooms dt").each(function () {
                     let room_name = $(this).children().text()
-                    room_name = room_name.substr(0, room_name.length - 4).replace(inRoomSymb, "")
+                    //room_name = room_name.substr(0, room_name.length - 4).replace(inRoomSymb, "")
                     //console.log(room_name)
 
                     if (roomlist_states.includes(room_name)) {
@@ -139,7 +92,7 @@ window.onload = function () {
 
 
             }
-            var item = $(`<div class="system-text"><label>${info.text}</label></div>`)
+            item.innerHTML =  `<div class="system-text"><label>` + info.text + `</label></div>`
         }
         else {
             var text = isUrl(chat.content)
@@ -148,17 +101,17 @@ window.onload = function () {
                     return
                 }
                 var bro_content = text;
-                var item = $(`<div class="chat-text">
+                item.innerHTML =  `<div class="chat-text">
                 <label class="sm-text"><span style="font-weight: 1000;">${chat.sender}</span> 於 ${chatTime} 廣播</lable><br>
-                <label class="bro-text">&nbsp;&nbsp;${bro_content}</label>
-            </div>`)
+                <label class="bro-text">&nbsp;&nbsp;` + bro_content + `</label>
+            </div>`
             }
             //一般的頻道消息
             else {
-                var item = $(`<div class="chat-text">
-                    <label class="sm-text"><span style="font-weight: 1000;">${chat.sender}</span> 於 ${chatTime}</lable><br>
-                    <label class="md-text">&nbsp;&nbsp;${text}</label>
-                </div>`)
+                item.innerHTML =  `<div class="chat-text">
+                    <label class="sm-text"><span style="font-weight: 1000;">` +chat.sender + `</span> 於 ${chatTime}</lable><br>
+                    <label class="md-text">&nbsp;&nbsp;` + text + `</label>
+                </div>`
             }
         }
         //打印訊息            

@@ -104,7 +104,11 @@ func (h *Hub) run() {
 
 			/*發送至該聊天室*/
 			for _, con := range conns {
+				if con.id == client.id {
+					continue
+				}
 				con.send <- message
+
 			}
 
 		/*使用者離線或切換聊天室

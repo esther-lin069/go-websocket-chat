@@ -73,7 +73,10 @@
                         :id="room.room_id"
                         :key="index"
                     >
-                        <button @click="goToRoom(room.room_id)" class="mh20 room-box-text room-btn">{{ room.room_id }} ({{ room.len }})</button>
+                        <button @click="goToRoom(room.room_id)" class="mh20 room-box-text room-btn">
+                            <span v-html="inRoom(room.room_id)"></span>
+                            {{ room.room_id }} ({{ room.len }})
+                        </button>
                     </dt>
                 </dl>
             </div>            
@@ -83,12 +86,12 @@
     <div id="chat">
         <div id="log"></div>
         <div id="form">
-            <form class="us-form form-inline">
-                <select id="msg-type">
-                    <option value="default">一般</option>
-                    <option value="broadcast">廣播</option>
+            <form v-on:submit.prevent="sendMsg" class="us-form form-inline">
+                <select v-model="type" id="msg-type">
+                    <option value='N' selected>一般</option>
+                    <option value='A'>廣播</option>
                 </select>
-                <input class="w3-input w3-border w3-round" type="text" id="msg" autofocus />
+                <input v-model="msg" class="w3-input w3-border w3-round" type="text" id="msg" autofocus />
                 <button type="submit">Send</button>
             </form>
         </div>
