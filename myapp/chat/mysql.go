@@ -74,6 +74,23 @@ func MakeRoom(roomId string) {
 	}
 }
 
+func MakePrivateRoom(roomId string) {
+	//查詢其是否存在
+	rows, err := db.Query("SELECT roomId FROM `private-rooms` WHERE roomId = ?", roomId)
+	checkErr(err)
+
+	if rows.Next() {
+		//exists
+	} else {
+		//插入資料
+		stmt, err := db.Prepare("INSERT `private-rooms` SET roomId=?,create_at=?")
+		checkErr(err)
+
+		_, err = stmt.Exec(roomId, GetUTCTime())
+		checkErr(err)
+	}
+}
+
 func MakeUser_RoomCheck(username string, roomId string) {
 
 	rows, err := db.Query("SELECT * FROM `user-room` WHERE user_id = ? AND room_id = ?", username, roomId)

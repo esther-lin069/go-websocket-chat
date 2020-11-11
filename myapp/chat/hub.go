@@ -174,6 +174,8 @@ func (h *Hub) run() {
 			//如果是私訊 通知該使用者
 			if msg.Type == "P" {
 				message, _ := json.Marshal(&Message{Sender: "SYS", RoomId: "", Type: "WP", Content: msg.Sender, Time: 0})
+				// 因為不確定要通知的人在哪個房間，所以得遍歷
+				// 這個做法不好 可以改redis
 				for _, con := range h.rooms {
 					if c, ok := con[msg.Recipient]; ok {
 						c.send <- message
@@ -252,7 +254,7 @@ func (h *Hub) sysTicker() {
 	defer ticker.Stop()
 	for {
 		<-ticker.C
-		message, _ := json.Marshal(&Message{Sender: "系統", RoomId: "", Type: "A", Content: "在這裡，每300秒就有五分鐘過去，珍惜眼睛，看看窗外", Time: time.Now().Unix()})
+		message, _ := json.Marshal(&Message{Sender: "系統", RoomId: "", Type: "A", Content: "在這裡，每300秒就有五分鐘過去，珍惜眼睛，看看窗外", Time: time.Now().Unix() * 1000})
 		h.sys(message)
 	}
 

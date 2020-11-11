@@ -21,6 +21,7 @@ var roomTitle = new Vue({
         title: CHATROOM,
         seen_leave: true,
         seen_del: true,
+        is_private: ''
     },
     methods: {
         DeleteRoom: function(){
@@ -292,7 +293,8 @@ var chatForm = new Vue({
 //判斷是否為大廳和私聊
 if (PRIVATION == "true" || CHATROOM == "main") {
     if(PRIVATION == "true"){
-        roomTitle.$data.title = "私聊：" + CHATROOM
+        roomTitle.$data.is_private = "<p style='font-size:12pt; color:#00798F'>私聊</p>"
+        roomTitle.$data.title = roomTitle.$data.title.replace(USER,'').replace('-','')
 
         let members = CHATROOM.split("-")
         if (members[0] == USER) {
@@ -378,7 +380,7 @@ function delRoom(id) {
         url: "/delete/" + id + "?user=" + USER,
     }).then((res)=>{
         swal("成功刪除", id + "聊天室含淚跟你說再見", "success")
-        window.location = res.request.responseURL
+        setTimeout(()=>{window.location = res.request.responseURL}, 1500)
     }).catch((err)=>{
         swal(err + "出錯了！刪除失敗！", id + "聊天室陰魂不散～", "error")
     })
@@ -392,7 +394,7 @@ function leaveRoom(id) {
         url: "/leave/" + id + "?user=" + USER,
     }).then((res)=>{
         swal("您已退出聊天室", id + "裡的朋友們會想念你的", "success")
-        setTimeout(()=>{window.location.href = res.request.responseURL}, 1000)
+        setTimeout(()=>{window.location.href = res.request.responseURL}, 1500)
     }).catch((err)=>{
         swal("出錯了！", id + "聊天室不想與你分開～", "error")
     })
@@ -425,32 +427,30 @@ function newRoom () {
 
 // 新建聊天室
 function makeNormalRoom(roomName) {
-    var xhr = new XMLHttpRequest();
-    $.ajax({
-        type: 'POST',
-        url: location.protocol + "/normalroom",
-        data: { "user": USER, "roomName": roomName },
-        xhr: function () {
-            return xhr
-        },
-        success: function () {
-            window.location.href = xhr.responseURL
+    axios({
+        method: 'post',
+        baseURL: HOST,
+        url: "/normalroom",
+        data: {
+            "user": USER,
+            "roomName": roomName,
         }
+    }).then((res)=>{
+        window.location.href = res.request.responseURL
     })
 }
 
 // 建立私聊連結
 function makePrivateRoom(s) {
-    var xhr = new XMLHttpRequest();
-    $.ajax({
-        type: 'POST',
-        url: location.protocol + "/privateroom",
-        data: { "user": USER, "roomName": s[0] + "-" + s[1] },
-        xhr: function () {
-            return xhr
-        },
-        success: function () {
-            window.location.href = xhr.responseURL
+    axios({
+        method: 'post',
+        baseURL: HOST,
+        url: "/privateroom",
+        data: {
+            "user": USER,
+            "roomName": s[0] + "-" + s[1],
         }
+    }).then((res)=>{
+        window.location.href = res.request.responseURL
     })
 }

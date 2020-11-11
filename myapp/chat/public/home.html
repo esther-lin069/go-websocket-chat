@@ -10,11 +10,10 @@
         integrity="sha384-AYmEC3Yw5cVb3ZcuHtOA93w35dYTsvhLPVnYs9eStHfGJvOvKxVfELGroGkvsg+p" crossorigin="anonymous" />
     <link href='https://cdnjs.cloudflare.com/ajax/libs/MaterialDesign-Webfont/3.6.95/css/materialdesignicons.css'>
 
-    <!-- jquery -->
-    <script src="https://code.jquery.com/jquery-2.2.4.min.js"
-        integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44=" crossorigin="anonymous"></script>
     <!-- vue.js -->
     <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
     <!-- 功能性套件 -->
     <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/2.1.4/toastr.min.css" rel="stylesheet" />
@@ -24,10 +23,6 @@
     <!-- 自訂css -->
     <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
     <link rel="stylesheet" href="../asset/css/home.css">
-
-    <!-- 自訂js -->
-    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-
 
 </head>
 <body>
@@ -43,7 +38,7 @@
         <div id="room-title" >
             <div class="room-title div-ell">
                 <!-- 聊天室名稱 -->
-                <h1 class="title-text" id="room-id">{{ title }}</h1>
+                <h1 class="title-text" id="room-id"><span v-html="is_private"></span>{{ title }}</h1>
                 <!-- 刪除聊天室按鈕 -->
                 <button class="exit-btn" v-show="seen_del" @click="DeleteRoom" id="del-room-btn">刪除房間</button>
                 <!-- 離開聊天室按鈕 -->

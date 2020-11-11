@@ -1,12 +1,18 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"strings"
 
 	"github.com/gin-gonic/gin"
 )
+
+type MakeRoomInfo struct {
+	UserName string `json:"user"`
+	RoomName string `json:"roomName"`
+}
 
 func serveHome(ctx *gin.Context) {
 	fmt.Println("HOMEEEEE")
@@ -36,24 +42,51 @@ func serveHome(ctx *gin.Context) {
 
 func login(ctx *gin.Context) {
 	username := strings.Trim(ctx.Request.FormValue("username"), " ")
+	if username == "" {
+		return
+	}
 	CheckUser(username)
 	ctx.Redirect(http.StatusMovedPermanently, "/chat/main/?user="+username+"&private=false")
 
 }
 
 func makePrivateRoom(ctx *gin.Context) {
-	username := ctx.Request.FormValue("user")
-	roomName := ctx.Request.FormValue("roomName")
-	ctx.Redirect(http.StatusMovedPermanently, "/chat/"+roomName+"?user="+username+"&private=true") //進入聊天室
+	data, _ := ctx.GetRawData()
+	// 解析post來的資料
+	var mpi MakeRoomInfo
+	err := json.Unmarshal(data, &mpi)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	if mpi.RoomName == "" || mpi.UserName == "" {
+		return
+	}
+	// 儲存私訊房間紀錄
+	MakePrivateRoom(mpi.RoomName)
+	// 進入私聊房間
+	ctx.Redirect(http.StatusFound, "/chat/"+mpi.RoomName+"?user="+mpi.UserName+"&private=true")
 
 }
 
 func makeNormalRoom(ctx *gin.Context) {
-	username := ctx.Request.FormValue("user")
-	roomName := ctx.Request.FormValue("roomName")
-	MakeRoom(roomName)
-	MakeUser_RoomCheck(username, roomName)
-	ctx.Redirect(http.StatusMovedPermanently, "/chat/"+roomName+"?user="+username+"&private=false") //進入聊天室
+	data, _ := ctx.GetRawData()
+	// 解析post來的資料
+	var mri MakeRoomInfo
+	err := json.Unmarshal(data, &mri)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	if mri.RoomName == "" || mri.UserName == "" {
+		return
+	}
+	// 建立房間
+	MakeRoom(mri.RoomName)
+	// 將使用者寫入該房間
+	MakeUser_RoomCheck(mri.UserName, mri.RoomName)
+	// 重新導向至該房間
+	ctx.Redirect(http.StatusFound, "/chat/"+mri.RoomName+"?user="+mri.UserName+"&private=false")
 }
 
 func askRoomList(ctx *gin.Context) {
