@@ -107,7 +107,7 @@ var allUserList = new Vue({
                     if(list[i] == USER)   //是自己的話不用列出
                         continue
 
-                    let tmp = {'read': '1', 'username':list[i]}
+                    let tmp = {'read': '1', 'username':list[i], 'online':false}
                     MEMBERS.push(tmp)
                 }
             })
@@ -144,6 +144,7 @@ var switchAllOnline = new Vue({
             this.allColor = '#827a7a'
         },
         sAll: function(){
+            allUserList.refreshReadStatus()
             onlineUserList.$data.seen = false
             allUserList.$data.seen = true
             this.onlineColor = '#827a7a'
@@ -220,6 +221,13 @@ function HandleMessage (message){
             info = JSON.parse(chat.content)
             rooms = JSON.parse(info.room_info)  //聊天室名單對應人數
             users = info.user_info.split(',')   //聊天室所有在線人員
+
+            /*上線狀態變更*/
+            for( member of MEMBERS){
+                if( users.includes(member.username) ){
+                    member.online = true
+                }
+            }
 
             /*聊天室人數變更*/
             let roomlist_states = (Object.keys(rooms))
@@ -299,6 +307,7 @@ if (PRIVATION == "true" || CHATROOM == "main") {
         roomTitle.$data.is_private = "<p style='font-size:12pt; color:#00798F'>私聊</p>"
         roomTitle.$data.title = roomTitle.$data.title.replace(USER,'').replace('-','')
 
+        // 取出收話人
         let members = CHATROOM.split("-")
         if (members[0] == USER) {
             RECIPIENT = members[1]
@@ -307,6 +316,10 @@ if (PRIVATION == "true" || CHATROOM == "main") {
             RECIPIENT = members[0]
         }
     }
+    // 直接顯示所有使用者而非在線列表
+    switchAllOnline.sAll()
+
+    // 隱藏刪除與離開按鈕
     roomTitle.$data.seen_leave = false
     roomTitle.$data.seen_del = false
 }

@@ -14,6 +14,16 @@ body {
 
 /* sprite */
 
+.user-fa-off{
+    color:#00798F;
+    margin-right:8px;
+}
+
+.user-fa-on{
+    color:#007a8f45;
+    margin-right:8px;
+}
+
 .exit-btn{
     margin-left: 0.5em;
     border: 0.05em;

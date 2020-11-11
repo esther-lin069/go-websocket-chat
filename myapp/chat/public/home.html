@@ -140,7 +140,7 @@
                 :key="index">
                     <div class="card">
                         <div class="box">
-                        <span style="color:#00798F;margin-right:8px;">
+                        <span :class="member.online != true ? 'user-fa-on' :'user-fa-off'">
                             <i class="fa fa-user"></i>
                         </span>
                         <a @click="privateChat(member.username)" :class="member.read == '0' ? 'pchat-btn-r' :'pchat-btn-w'" role="button" href="#" data-id="${element}">
