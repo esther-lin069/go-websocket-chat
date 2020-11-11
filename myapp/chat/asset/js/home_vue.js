@@ -133,7 +133,7 @@ var switchAllOnline = new Vue({
     el: '#switch-all-online',
     data: {
         onlineColor: '#413636',
-        allColor: '#827a7a',
+        allColor: '#acacac',
     },
     methods: {
         // 切換按鈕使用狀態與區塊顯示判斷
@@ -141,13 +141,13 @@ var switchAllOnline = new Vue({
             onlineUserList.$data.seen = true
             allUserList.$data.seen = false
             this.onlineColor = '#413636'
-            this.allColor = '#827a7a'
+            this.allColor = '#acacac'
         },
         sAll: function(){
             allUserList.refreshReadStatus()
             onlineUserList.$data.seen = false
             allUserList.$data.seen = true
-            this.onlineColor = '#827a7a'
+            this.onlineColor = '#acacac'
             this.allColor = '#413636'
         }
     }
@@ -307,6 +307,9 @@ if (PRIVATION == "true" || CHATROOM == "main") {
         roomTitle.$data.is_private = "<p style='font-size:12pt; color:#00798F'>私聊</p>"
         roomTitle.$data.title = roomTitle.$data.title.replace(USER,'').replace('-','')
 
+        // 直接顯示所有使用者而非在線列表
+        switchAllOnline.sAll() 
+
         // 取出收話人
         let members = CHATROOM.split("-")
         if (members[0] == USER) {
@@ -316,8 +319,7 @@ if (PRIVATION == "true" || CHATROOM == "main") {
             RECIPIENT = members[0]
         }
     }
-    // 直接顯示所有使用者而非在線列表
-    switchAllOnline.sAll()
+    
 
     // 隱藏刪除與離開按鈕
     roomTitle.$data.seen_leave = false
