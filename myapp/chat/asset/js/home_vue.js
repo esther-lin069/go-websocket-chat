@@ -83,7 +83,10 @@ var allUserList = new Vue({
     methods: {
         privateChat(toWho){
             let sort_users = [USER, toWho].sort();
-                makePrivateRoom(sort_users)
+                makePrivateRoom(sort_users,toWho)
+        },
+        refreshReadStatus: function(){
+            getReadStatus(USER)
         }
     },
     computed: {
@@ -104,7 +107,7 @@ var allUserList = new Vue({
                     if(list[i] == USER)   //是自己的話不用列出
                         continue
 
-                    let tmp = {'id': i, 'username':list[i]}
+                    let tmp = {'read': '1', 'username':list[i]}
                     MEMBERS.push(tmp)
                 }
             })
@@ -206,12 +209,12 @@ function HandleMessage (message){
             onlineUserList.changeOnline(ONLINE)
 
         }
-        else if (chat.type == "WP") {
-            if (!CHATROOM.includes(chat.content) && PRIVATION != true){
-                showToastr(chat.content)
-            }
+        // else if (chat.type == "WP") {
+        //     if (!CHATROOM.includes(chat.content) && PRIVATION != true){
+        //         //showToastr(chat.content)
+        //     }
             
-        }
+        // }
         //系統info
         else {
             info = JSON.parse(chat.content)
@@ -334,26 +337,26 @@ function appendLog(item) {
 }
 
 //私訊通知＿toastr通知設定
-function showToastr(id){
-    toastr.options = {
-        "closeButton": false,
-        "debug": false,
-        "newestOnTop": false,
-        "progressBar": false,
-        "positionClass": "toast-bottom-right",
-        "preventDuplicates": false,
-        "onclick": null,
-        "showDuration": "300",
-        "hideDuration": "1000",
-        "timeOut": "3000",
-        "extendedTimeOut": "1000",
-        "showEasing": "swing",
-        "hideEasing": "linear",
-        "showMethod": "fadeIn",
-        "hideMethod": "fadeOut"
-    }
-    toastr["info"]("您有來自"+id+"的私訊", "通知");
-}
+// function showToastr(id){
+//     toastr.options = {
+//         "closeButton": false,
+//         "debug": false,
+//         "newestOnTop": false,
+//         "progressBar": false,
+//         "positionClass": "toast-bottom-right",
+//         "preventDuplicates": false,
+//         "onclick": null,
+//         "showDuration": "300",
+//         "hideDuration": "1000",
+//         "timeOut": "3000",
+//         "extendedTimeOut": "1000",
+//         "showEasing": "swing",
+//         "hideEasing": "linear",
+//         "showMethod": "fadeIn",
+//         "hideMethod": "fadeOut"
+//     }
+//     toastr["info"]("您有來自"+id+"的私訊", "通知");
+// }
 
 /*房間操作 (ajax)*/
 
@@ -434,6 +437,7 @@ function makeNormalRoom(roomName) {
         data: {
             "user": USER,
             "roomName": roomName,
+            "with": ""
         }
     }).then((res)=>{
         window.location.href = res.request.responseURL
@@ -441,7 +445,7 @@ function makeNormalRoom(roomName) {
 }
 
 // 建立私聊連結
-function makePrivateRoom(s) {
+function makePrivateRoom(s,toWho) {
     axios({
         method: 'post',
         baseURL: HOST,
@@ -449,8 +453,26 @@ function makePrivateRoom(s) {
         data: {
             "user": USER,
             "roomName": s[0] + "-" + s[1],
+            "with": toWho
         }
     }).then((res)=>{
         window.location.href = res.request.responseURL
+    })
+}
+
+function getReadStatus(user){
+    axios({
+        method: 'get',
+        baseURL: HOST,
+        url: "/readstatus/" + user,
+    }).then((e)=>{
+        var obj = JSON.parse(e.data.readstatus)
+        // 接收到未讀標記，更改名單內容
+        for( member of MEMBERS){
+            if( Object.keys(obj).includes(member.username) ){
+                if(obj[member.username] == '0')
+                    member.read = '0'
+            }
+        }
     })
 }

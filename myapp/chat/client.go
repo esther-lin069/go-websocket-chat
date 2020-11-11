@@ -94,15 +94,6 @@ func GetUTCTime() string {
 	return formatted
 }
 
-/*獲取Redis連線*/
-func GetRedisClient() *redis.Client {
-	return redis.NewClient(&redis.Options{
-		Addr:     "redis:6379",
-		Password: "",
-		DB:       0,
-	})
-}
-
 /*讀取從ws來的訊息*/
 func (c *Client) readPump() {
 	defer func() {
@@ -123,7 +114,7 @@ func (c *Client) readPump() {
 
 		/*存入redis*/
 		m := RedisMsg{c.roomId, float64(time.Now().UnixNano()), message}
-		c.zsetMessage(m) //以毫秒作為key
+		c.ZsetMessage(m) //以毫秒作為key
 
 		/*存入Mysql*/
 		PutMsgSingle(message)
@@ -194,46 +185,4 @@ func serveWs(hub *Hub, ctx *gin.Context) {
 	// Allow collection of memory referenced by the caller by doing all work in new goroutines
 	go client.writePump()
 	go client.readPump()
-}
-
-/*Redis存取+刪除*/
-func (c *Client) zsetMessage(m RedisMsg) {
-	rdb := c.redis_conn
-
-	msg := redis.Z{
-		Score:  m.Id,
-		Member: m.Value,
-	}
-
-	length := rdb.ZCard(m.User).Val()
-	if length >= zrange {
-		//data := c.zrangeMessage(m.User, zrange/2)
-		//將前一半筆放入mysql
-		//PutMsgList(m.User, data)
-		rdb.ZRemRangeByRank(m.User, 0, zrange/2)
-	}
-
-	err := rdb.ZAdd(m.User, msg).Err()
-	if err != nil {
-		panic(err)
-	}
-}
-
-func (c *Client) zrangeMessage(id string, len int64) []redis.Z {
-	rdb := c.redis_conn
-
-	data, err := rdb.ZRangeWithScores(id, 0, len).Result()
-	if err != nil {
-		panic(err)
-	}
-	return data
-
-}
-
-func delKey(key string) {
-	rdb := GetRedisClient()
-	err := rdb.Del(key).Err()
-	if err != nil {
-		panic(err)
-	}
 }

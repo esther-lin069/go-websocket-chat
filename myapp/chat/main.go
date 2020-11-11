@@ -12,11 +12,10 @@ import (
 type MakeRoomInfo struct {
 	UserName string `json:"user"`
 	RoomName string `json:"roomName"`
+	With     string `json:"with"`
 }
 
 func serveHome(ctx *gin.Context) {
-	fmt.Println("HOMEEEEE")
-	//log.Println(r.URL)
 	if ctx.Query("user") == "" {
 		ctx.Redirect(http.StatusMovedPermanently, "/login") //在這裡加私訊驗證
 	}
@@ -64,6 +63,8 @@ func makePrivateRoom(ctx *gin.Context) {
 	}
 	// 儲存私訊房間紀錄
 	MakePrivateRoom(mpi.RoomName)
+	// 已讀狀態
+	HsetForPrivate(mpi.UserName, mpi.With, "1")
 	// 進入私聊房間
 	ctx.Redirect(http.StatusFound, "/chat/"+mpi.RoomName+"?user="+mpi.UserName+"&private=true")
 
@@ -121,6 +122,18 @@ func doLeaveRoom(ctx *gin.Context) {
 	ctx.Redirect(http.StatusFound, "/chat/main/?user="+user+"&private=false") //進入聊天室
 }
 
+func readStatus(ctx *gin.Context) {
+	user := ctx.Param("user")
+	result := GetHashForPrivate(user)
+	json, err := json.Marshal(result)
+	if err != nil {
+		fmt.Println(err)
+	}
+	ctx.JSON(200, gin.H{
+		"readstatus": string(json),
+	})
+}
+
 func main() {
 	hub := newHub()
 	db = InitDB()
@@ -143,6 +156,7 @@ func main() {
 
 	router.GET("/delete/:roomId", doDelRoom)
 	router.GET("/leave/:roomId", doLeaveRoom)
+	router.GET("/readstatus/:user", readStatus)
 	router.GET("/chat/:roomId", serveHome)
 
 	router.POST("/privateroom", makePrivateRoom)

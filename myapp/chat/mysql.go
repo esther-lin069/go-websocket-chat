@@ -148,7 +148,7 @@ func DelRoom(roomId string) {
 	_, err := db.Exec("DELETE FROM rooms WHERE roomId = ?", roomId)
 	checkErr(err)
 
-	delKey(roomId)
+	DelKey(roomId)
 }
 
 func LeaveRoom(roomId string, user string) {

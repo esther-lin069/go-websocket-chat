@@ -173,14 +173,18 @@ func (h *Hub) run() {
 
 			//如果是私訊 通知該使用者
 			if msg.Type == "P" {
-				message, _ := json.Marshal(&Message{Sender: "SYS", RoomId: "", Type: "WP", Content: msg.Sender, Time: 0})
+				// message, _ := json.Marshal(&Message{Sender: "SYS", RoomId: "", Type: "WP", Content: msg.Sender, Time: 0})
 				// 因為不確定要通知的人在哪個房間，所以得遍歷
 				// 這個做法不好 可以改redis
-				for _, con := range h.rooms {
-					if c, ok := con[msg.Recipient]; ok {
-						c.send <- message
-					}
-				}
+				// for _, con := range h.rooms {
+				// 	if c, ok := con[msg.Recipient]; ok {
+				// 		c.send <- message
+				// 	}
+				// }
+
+				// redis存放已讀標記資訊
+				HsetForPrivate(msg.Recipient, msg.Sender, "0")
+
 			}
 
 			conns := h.rooms[msg.RoomId]
@@ -196,7 +200,7 @@ func (h *Hub) run() {
 
 		case client := <-h.loadmsg:
 			user_room := client.roomId
-			data := client.zrangeMessage(user_room, zrange)
+			data := client.ZrangeMessage(user_room, zrange)
 			/*印出歷史訊息*/
 			for k := range data {
 				msg := data[k].Member.(string)

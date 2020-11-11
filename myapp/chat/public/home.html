@@ -129,6 +129,9 @@
         <!-- 所有使用者區塊 -->
         <div v-show="seen" id="all-users" class="all-users">
             <label style="margin-left: 10%;">搜尋</label>
+            <a @click="refreshReadStatus" style="color: #00798F;">
+                <i class="fa fa-redo-alt"></i>
+            </a>
             <input v-model="search" type="text" class="w3-input w3-border w3-round" id="user-search">
             <dl>
                 <dt 
@@ -140,9 +143,9 @@
                         <span style="color:#00798F;margin-right:8px;">
                             <i class="fa fa-user"></i>
                         </span>
-                        <a @click="privateChat(member.username)" class="pchat-btn" role="button" href="#" data-id="${element}">
+                        <a @click="privateChat(member.username)" :class="member.read == '0' ? 'pchat-btn-r' :'pchat-btn-w'" role="button" href="#" data-id="${element}">
                             <i class="fa fa-comment-dots"></i></a>
-                        <span class="box-text">{{ member.username }}</span> 
+                        <span class="box-text">{{ member.username }}</span>
                         </div>
                     </div>
                 </dt>

@@ -58,8 +58,13 @@ body {
     border-radius: 0.4em;
 }
 
-.pchat-btn i {
-    color: #FFF;
+.pchat-btn-w {
+    color: white;
+    text-align: right;
+}
+
+.pchat-btn-r {
+    color: rgb(228, 128, 128);
     text-align: right;
 }
 
