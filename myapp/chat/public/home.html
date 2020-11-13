@@ -38,18 +38,16 @@
         <div id="room-title" >
             <div class="room-title div-ell">
                 <!-- 聊天室名稱 -->
-                <h1 class="title-text" id="room-id"><span v-html="is_private"></span>{{ title }}</h1>
+                <h1 class="title-text"><span v-html="is_private"></span>{{ title }}</h1>
                 <!-- 刪除聊天室按鈕 -->
-                <button class="exit-btn" v-show="seen_del" @click="DeleteRoom" id="del-room-btn">刪除房間</button>
+                <button class="exit-btn" v-show="seen_del" @click="DeleteRoom">刪除房間</button>
                 <!-- 離開聊天室按鈕 -->
-                <button class="exit-btn" v-show="seen_leave" @click="LeaveRoom" id="leave-room-btn">退出房間</button>
+                <button class="exit-btn" v-show="seen_leave" @click="LeaveRoom">退出房間</button>
             </div>
             <h5 class="title-text">聊天室列表
-                <button @click="NewRoom" id="newRoom">
-                    <svg class="svg-icon" viewBox="0 0 20 20">
-                        <path
-                            d="M14.613,10c0,0.23-0.188,0.419-0.419,0.419H10.42v3.774c0,0.23-0.189,0.42-0.42,0.42s-0.419-0.189-0.419-0.42v-3.774H5.806c-0.23,0-0.419-0.189-0.419-0.419s0.189-0.419,0.419-0.419h3.775V5.806c0-0.23,0.189-0.419,0.419-0.419s0.42,0.189,0.42,0.419v3.775h3.774C14.425,9.581,14.613,9.77,14.613,10 M17.969,10c0,4.401-3.567,7.969-7.969,7.969c-4.402,0-7.969-3.567-7.969-7.969c0-4.402,3.567-7.969,7.969-7.969C14.401,2.031,17.969,5.598,17.969,10 M17.13,10c0-3.932-3.198-7.13-7.13-7.13S2.87,6.068,2.87,10c0,3.933,3.198,7.13,7.13,7.13S17.13,13.933,17.13,10">
-                        </path>
+                <button @click="NewRoom" class="new-room-btn">
+                    <svg viewBox="0 0 16 16" fill="#00798F" xmlns="http://www.w3.org/2000/svg">
+                        <path fill-rule="evenodd" d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM8.5 4.5a.5.5 0 0 0-1 0v3h-3a.5.5 0 0 0 0 1h3v3a.5.5 0 0 0 1 0v-3h3a.5.5 0 0 0 0-1h-3v-3z"/>
                     </svg>
                 </button>
             </h5>
@@ -141,9 +139,8 @@
             <label style="margin-left: 10%;">搜尋</label>            
             <input 
                 v-model="search" 
-                type="text" 
-                style="height: 2em;" 
-                class="w3-input w3-border w3-round"
+                type="text"
+                class="user-search w3-input w3-border w3-round"
             >
             <a @click="refreshReadStatus" class="status-a">
                 狀態更新 <i class="fa fa-redo-alt"></i>
