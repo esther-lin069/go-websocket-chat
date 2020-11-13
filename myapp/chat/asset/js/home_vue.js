@@ -132,23 +132,25 @@ var onlineUserList = new Vue({
 var switchAllOnline = new Vue({
     el: '#switch-all-online',
     data: {
-        onlineColor: '#413636',
-        allColor: '#acacac',
+        toggle: 'online',        
+        Colors: {
+            activeColor: '#413636',
+            inactiveColor: '#acacac'
+        }
+        
     },
     methods: {
         // 切換按鈕使用狀態與區塊顯示判斷
         sOnline: function(){
             onlineUserList.$data.seen = true
             allUserList.$data.seen = false
-            this.onlineColor = '#413636'
-            this.allColor = '#acacac'
+            this.toggle = 'online'
         },
         sAll: function(){
             allUserList.refreshReadStatus()
             onlineUserList.$data.seen = false
             allUserList.$data.seen = true
-            this.onlineColor = '#acacac'
-            this.allColor = '#413636'
+            this.toggle = 'all'
         }
     }
 })
@@ -227,6 +229,9 @@ function HandleMessage (message){
                 if( users.includes(member.username) ){
                     member.online = true
                 }
+                else{
+                    member.online = false
+                }
             }
 
             /*聊天室人數變更*/
@@ -304,6 +309,7 @@ var chatForm = new Vue({
 //判斷是否為大廳和私聊
 if (PRIVATION == "true" || CHATROOM == "main") {
     if(PRIVATION == "true"){
+        // 調整標題
         roomTitle.$data.is_private = "<p style='font-size:12pt; color:#00798F'>私聊</p>"
         roomTitle.$data.title = roomTitle.$data.title.replace(USER,'').replace('-','')
 
@@ -475,6 +481,7 @@ function makePrivateRoom(s,toWho) {
     })
 }
 
+// 拿取私訊已讀與否的資料
 function getReadStatus(user){
     axios({
         method: 'get',
