@@ -64,9 +64,21 @@ body {
 .status-a{
     color: #595959; 
     float: right;
-    margin-right: 1.5em;
+    margin-right: 0.5em;
     margin-top: 1em;
     font-size: 9pt;
+}
+
+.status-h{
+    background-color: #00798F;
+    color: white;
+    border: unset;
+    border-radius: 0.3em;
+    margin-right: 1em;
+    float: right;
+    margin-top: 1em;
+    width: 1em;
+    height: 1em;
 }
 
 .status-a:hover{

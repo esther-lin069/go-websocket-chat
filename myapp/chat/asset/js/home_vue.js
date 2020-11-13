@@ -90,9 +90,12 @@ var allUserList = new Vue({
         setAutoRefresh: function () {
             this.auto = !this.auto
         },
-        refreshReadStatus:function() {
+        RefreshRead: function(){
+            getReadStatus(USER)
+        },
+        AutoRefreshRead:function() {
             this.interval = setInterval(() => {
-                getReadStatus(USER)
+                this.RefreshRead()
             }, 3000);
         }
     },
@@ -122,7 +125,7 @@ var allUserList = new Vue({
     updated() {
         if (this.auto == true) {
             // 每隔秒自動刷新私訊狀態
-            this.refreshReadStatus()
+            this.AutoRefreshRead()
         }
         else {
             clearInterval(this.interval)
