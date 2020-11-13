@@ -24,13 +24,13 @@ var roomTitle = new Vue({
         is_private: ''
     },
     methods: {
-        DeleteRoom: function(){
+        DeleteRoom: function () {
             swalDelRoom(this.title)
         },
-        LeaveRoom: function(){
+        LeaveRoom: function () {
             leaveRoom(this.title)
         },
-        NewRoom: function(){
+        NewRoom: function () {
             newRoom()
         }
     }
@@ -50,26 +50,26 @@ var roomList = new Vue({
         rooms: ROOMS
     },
     methods: {
-        goToRoom(room_id){
+        goToRoom(room_id) {
             let search = replaceQueryParam('private', 'false', location.search)
             window.location.href = HOST + "/chat/" + room_id + search
         },
-        inRoom(room_id){
-            return (room_id === CHATROOM) ? inRoomSymb : '' 
+        inRoom(room_id) {
+            return (room_id === CHATROOM) ? inRoomSymb : ''
         }
     },
     mounted() {
         axios
             .get(HOST + "/roomlist" + location.search)
-            .then(function(e){
+            .then(function (e) {
                 let list = e.data.rooms.split(',')
-                for( let i=0; i < list.length ;i++){
-                    let tmp = {'id': i, 'room_id':list[i], 'len': 0}
+                for (let i = 0; i < list.length; i++) {
+                    let tmp = { 'id': i, 'room_id': list[i], 'len': 0 }
                     ROOMS.push(tmp)
                 }
             })
     },
-    
+
 })
 
 //列出所有使用者
@@ -78,46 +78,56 @@ var allUserList = new Vue({
     data: {
         members: MEMBERS,
         seen: false,
-        search: ''
+        search: '',
+        auto: false,
+        interval: null
     },
     methods: {
-        privateChat(toWho){
+        privateChat(toWho) {
             let sort_users = [USER, toWho].sort();
-                makePrivateRoom(sort_users,toWho)
+            makePrivateRoom(sort_users, toWho)
         },
-        // refreshReadStatus: function(){
-        //     //setTimeout(() => getReadStatus(USER),5000)
-        //     getReadStatus(USER)            
-        // }
+        setAutoRefresh: function () {
+            this.auto = !this.auto
+        },
+        refreshReadStatus:function() {
+            this.interval = setInterval(() => {
+                getReadStatus(USER)
+            }, 3000);
+        }
     },
     computed: {
         // 搜尋並返回結果
-        filterd: function(){
+        filterd: function () {
             var s = this.search.toLowerCase();
-            return(s.trim() !== '') ?
-                this.members.filter(function(d){ return d.username.toLowerCase().indexOf(s) > -1; }) :
+            return (s.trim() !== '') ?
+                this.members.filter(function (d) { return d.username.toLowerCase().indexOf(s) > -1; }) :
                 this.members
         }
     },
     created() {
         axios
             .get(HOST + "/userlist")
-            .then(function(e){
+            .then(function (e) {
                 let list = e.data.users.split(',')
-                for( let i=0; i < list.length ;i++){
-                    if(list[i] == USER)   //是自己的話不用列出
+                for (let i = 0; i < list.length; i++) {
+                    if (list[i] == USER)   //是自己的話不用列出
                         continue
 
-                    let tmp = {'read': '1', 'username':list[i], 'online':false}
+                    let tmp = { 'read': '1', 'username': list[i], 'online': false }
                     MEMBERS.push(tmp)
                 }
             })
     },
-    mounted() {
-        // 每隔五秒自動刷新私訊狀態
-        setInterval(() => {
-            getReadStatus(USER)
-        }, 5000);
+    updated() {
+        if (this.auto == true) {
+            // 每隔秒自動刷新私訊狀態
+            this.refreshReadStatus()
+        }
+        else {
+            clearInterval(this.interval)
+        }
+
     }
 
 })
@@ -130,7 +140,7 @@ var onlineUserList = new Vue({
         o_members: [],
     },
     methods: {
-        changeOnline: function(list){
+        changeOnline: function (list) {
             this.o_members = list
         }
     }
@@ -139,21 +149,21 @@ var onlineUserList = new Vue({
 var switchAllOnline = new Vue({
     el: '#switch-all-online',
     data: {
-        toggle: 'online',        
+        toggle: 'online',
         Colors: {
             activeColor: '#413636',
             inactiveColor: '#acacac'
         }
-        
+
     },
     methods: {
         // 切換按鈕使用狀態與區塊顯示判斷
-        sOnline: function(){
+        sOnline: function () {
             onlineUserList.$data.seen = true
             allUserList.$data.seen = false
             this.toggle = 'online'
         },
-        sAll: function(){
+        sAll: function () {
             //allUserList.refreshReadStatus()
             onlineUserList.$data.seen = false
             allUserList.$data.seen = true
@@ -180,7 +190,7 @@ if (window["WebSocket"]) {
     conn.onmessage = function (evt) {
         var messages = evt.data.split('\n');
         for (var i = 0; i < messages.length; i++) {
-            HandleMessage (messages[i])
+            HandleMessage(messages[i])
         }
     }
 } else {
@@ -190,7 +200,7 @@ if (window["WebSocket"]) {
 }
 
 //處理訊息
-function HandleMessage (message){
+function HandleMessage(message) {
     var item = document.createElement('div');
     var chat = JSON.parse(message);
     var chatTime = new Date(chat.time).toLocaleString('zh-TW');
@@ -207,11 +217,11 @@ function HandleMessage (message){
             }
 
             var members = info.user_info.split(",")
-            for( let i=0; i < members.length ;i++){
-                if(members[i] == USER)   //是自己的話不用列出
+            for (let i = 0; i < members.length; i++) {
+                if (members[i] == USER)   //是自己的話不用列出
                     continue
 
-                let tmp = {'username':members[i]}                
+                let tmp = { 'username': members[i] }
                 ONLINE.push(tmp)
             }
 
@@ -223,7 +233,7 @@ function HandleMessage (message){
         //     if (!CHATROOM.includes(chat.content) && PRIVATION != true){
         //         //showToastr(chat.content)
         //     }
-            
+
         // }
         //系統info
         else {
@@ -232,11 +242,11 @@ function HandleMessage (message){
             users = info.user_info.split(',')   //聊天室所有在線人員
 
             /*上線狀態變更*/
-            for( member of MEMBERS){
-                if( users.includes(member.username) ){
+            for (member of MEMBERS) {
+                if (users.includes(member.username)) {
                     member.online = true
                 }
-                else{
+                else {
                     member.online = false
                 }
             }
@@ -252,7 +262,7 @@ function HandleMessage (message){
 
         }
         //系統訊息ex.ＸＸＸ離開聊天室
-        item.innerHTML =  `<div class="system-text"><label>` + info.text + `</label></div>`
+        item.innerHTML = `<div class="system-text"><label>` + info.text + `</label></div>`
     }
     else {
         //判別內容是否包含鏈結
@@ -262,18 +272,18 @@ function HandleMessage (message){
         if (chat.type == "A") {
 
             //是私訊的話把全域廣播擋下來
-            if (PRIVATION == "true"){ 
+            if (PRIVATION == "true") {
                 return
             }
 
-            item.innerHTML =  `<div class="chat-text">\
-                <label class="sm-text"><span class="b-text">`+ chat.sender +`</span> - ` + chatTime + ` 廣播</lable><br>\
+            item.innerHTML = `<div class="chat-text">\
+                <label class="sm-text"><span class="b-text">`+ chat.sender + `</span> - ` + chatTime + ` 廣播</lable><br>\
                 <label class="bro-text">` + text + `</label>\
             </div>`
         }
         //一般的頻道消息
         else {
-            item.innerHTML =  `<div class="chat-text">\
+            item.innerHTML = `<div class="chat-text">\
                 <label class="sm-text"><span class="b-text">` + chat.sender + `</span> -` + chatTime + `</lable><br>\
                 <label class="md-text">` + text + `</label>\
             </div>`
@@ -287,19 +297,19 @@ function HandleMessage (message){
 var chatForm = new Vue({
     el: '#form',
     data: {
-        msg : '',
-        type : 'N'
+        msg: '',
+        type: 'N'
     },
     methods: {
-        sendMsg: function(){
+        sendMsg: function () {
             var content = this.msg
             if (!conn) {
-                return false 
-            }
-            if (this.msg = ''){
                 return false
             }
-            if (PRIVATION == "true"){
+            if (this.msg = '') {
+                return false
+            }
+            if (PRIVATION == "true") {
                 this.type = "P"
             }
             jstr = JSON.stringify({ sender: USER, roomId: CHATROOM, recipient: RECIPIENT, type: this.type, content: content, time: Date.now() });
@@ -315,13 +325,13 @@ var chatForm = new Vue({
 
 //判斷是否為大廳和私聊
 if (PRIVATION == "true" || CHATROOM == "main") {
-    if(PRIVATION == "true"){
+    if (PRIVATION == "true") {
         // 調整標題
         roomTitle.$data.is_private = "<p style='font-size:12pt; color:#00798F'>私聊</p>"
-        roomTitle.$data.title = roomTitle.$data.title.replace(USER,'').replace('-','')
+        roomTitle.$data.title = roomTitle.$data.title.replace(USER, '').replace('-', '')
 
         // 直接顯示所有使用者而非在線列表
-        switchAllOnline.sAll() 
+        switchAllOnline.sAll()
 
         // 取出收話人
         let members = CHATROOM.split("-")
@@ -332,7 +342,7 @@ if (PRIVATION == "true" || CHATROOM == "main") {
             RECIPIENT = members[0]
         }
     }
-    
+
 
     // 隱藏刪除與離開按鈕
     roomTitle.$data.seen_leave = false
@@ -348,7 +358,7 @@ function replaceQueryParam(param, newval, search) {
 }
 
 //判斷是否為超連結
-function isUrl(v){
+function isUrl(v) {
     var reg = /(http:\/\/|https:\/\/)((\w|=|\?|\.|\/|&|#|-)+)/g;
     v = v.replace(reg, `<a href='$1$2' target="_blank">$1$2</a>`).replace(/\n/g, "<br />");
     return v
@@ -389,7 +399,7 @@ function appendLog(item) {
 /*房間操作 (ajax)*/
 
 //刪除房間中介點
-function swalDelRoom (room_id) {
+function swalDelRoom(room_id) {
     swal({
         title: "刪除該聊天室？",
         text: "該聊天室資料與聊天記錄會全部消失",
@@ -409,10 +419,10 @@ function delRoom(id) {
         method: 'get',
         baseURL: HOST,
         url: "/delete/" + id + "?user=" + USER,
-    }).then((res)=>{
+    }).then((res) => {
         swal("成功刪除", id + "聊天室含淚跟你說再見", "success")
-        setTimeout(()=>{window.location = res.request.responseURL}, 1500)
-    }).catch((err)=>{
+        setTimeout(() => { window.location = res.request.responseURL }, 1500)
+    }).catch((err) => {
         swal(err + "出錯了！刪除失敗！", id + "聊天室陰魂不散～", "error")
     })
 }
@@ -423,16 +433,16 @@ function leaveRoom(id) {
         method: 'get',
         baseURL: HOST,
         url: "/leave/" + id + "?user=" + USER,
-    }).then((res)=>{
+    }).then((res) => {
         swal("您已退出聊天室", id + "裡的朋友們會想念你的", "success")
-        setTimeout(()=>{window.location.href = res.request.responseURL}, 1500)
-    }).catch((err)=>{
+        setTimeout(() => { window.location.href = res.request.responseURL }, 1500)
+    }).catch((err) => {
         swal("出錯了！", id + "聊天室不想與你分開～", "error")
     })
 }
 
 //新增房間
-function newRoom () {
+function newRoom() {
     swal({
         title: "建立/前往 聊天室",
         text: "聊天室id:",
@@ -467,13 +477,13 @@ function makeNormalRoom(roomName) {
             "roomName": roomName,
             "with": ""
         }
-    }).then((res)=>{
+    }).then((res) => {
         window.location.href = res.request.responseURL
     })
 }
 
 // 建立私聊連結
-function makePrivateRoom(s,toWho) {
+function makePrivateRoom(s, toWho) {
     axios({
         method: 'post',
         baseURL: HOST,
@@ -483,23 +493,23 @@ function makePrivateRoom(s,toWho) {
             "roomName": s[0] + "-" + s[1],
             "with": toWho
         }
-    }).then((res)=>{
+    }).then((res) => {
         window.location.href = res.request.responseURL
     })
 }
 
 // 拿取私訊已讀與否的資料
-function getReadStatus(user){
+function getReadStatus(user) {
     axios({
         method: 'get',
         baseURL: HOST,
         url: "/readstatus/" + user,
-    }).then((e)=>{
+    }).then((e) => {
         var obj = JSON.parse(e.data.readstatus)
         // 接收到未讀標記，更改名單內容
-        for( member of MEMBERS){
-            if( Object.keys(obj).includes(member.username) ){
-                if(obj[member.username] == '0')
+        for (member of MEMBERS) {
+            if (Object.keys(obj).includes(member.username)) {
+                if (obj[member.username] == '0')
                     member.read = '0'
             }
         }

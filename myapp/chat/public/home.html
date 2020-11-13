@@ -142,9 +142,10 @@
                 type="text"
                 class="user-search w3-input w3-border w3-round"
             >
-            <a  class="status-a">
+            <!-- <a  class="status-a">
                 狀態更新 <i class="fa fa-redo-alt"></i>
-            </a>
+            </a> -->
+            <a class="status-a" @click="setAutoRefresh">自動更新：{{ (auto == true)?'on':'off' }}</a>
             <!-- 清單 -->
             <dl style="margin-top: 2.5em;">
                 <dt 
