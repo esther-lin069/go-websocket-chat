@@ -85,9 +85,10 @@ var allUserList = new Vue({
             let sort_users = [USER, toWho].sort();
                 makePrivateRoom(sort_users,toWho)
         },
-        refreshReadStatus: function(){
-            getReadStatus(USER)
-        }
+        // refreshReadStatus: function(){
+        //     //setTimeout(() => getReadStatus(USER),5000)
+        //     getReadStatus(USER)            
+        // }
     },
     computed: {
         // 搜尋並返回結果
@@ -98,7 +99,7 @@ var allUserList = new Vue({
                 this.members
         }
     },
-    mounted() {
+    created() {
         axios
             .get(HOST + "/userlist")
             .then(function(e){
@@ -112,6 +113,12 @@ var allUserList = new Vue({
                 }
             })
     },
+    mounted() {
+        // 每隔五秒自動刷新私訊狀態
+        setInterval(() => {
+            getReadStatus(USER)
+        }, 5000);
+    }
 
 })
 
@@ -147,7 +154,7 @@ var switchAllOnline = new Vue({
             this.toggle = 'online'
         },
         sAll: function(){
-            allUserList.refreshReadStatus()
+            //allUserList.refreshReadStatus()
             onlineUserList.$data.seen = false
             allUserList.$data.seen = true
             this.toggle = 'all'
@@ -260,15 +267,15 @@ function HandleMessage (message){
             }
 
             item.innerHTML =  `<div class="chat-text">\
-                <label class="sm-text"><span style="font-weight: 1000;">`+ chat.sender +`</span> 於 ` + chatTime + `廣播</lable><br>\
-                <label class="bro-text">&nbsp;&nbsp;` + text + `</label>\
+                <label class="sm-text"><span class="b-text">`+ chat.sender +`</span> - ` + chatTime + ` 廣播</lable><br>\
+                <label class="bro-text">` + text + `</label>\
             </div>`
         }
         //一般的頻道消息
         else {
             item.innerHTML =  `<div class="chat-text">\
-                <label class="sm-text"><span style="font-weight: 1000;">` + chat.sender + `</span> 於` + chatTime + `</lable><br>\
-                <label class="md-text">&nbsp;&nbsp;` + text + `</label>\
+                <label class="sm-text"><span class="b-text">` + chat.sender + `</span> -` + chatTime + `</lable><br>\
+                <label class="md-text">` + text + `</label>\
             </div>`
         }
     }

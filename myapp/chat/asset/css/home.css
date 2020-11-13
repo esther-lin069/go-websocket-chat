@@ -292,15 +292,22 @@ SVG Icons - svgicons.sparkk.fr
 
 .sm-text {
     font-size: small;
-    color: dimgray;
+    color: rgb(172, 172, 172);
+}
+
+.b-text{
+    font-weight: 1000;
+    color: #3e3e3e;
 }
 
 .md-text {
+    margin-left: 0.5em;
     font-size: 14pt;
     color: #000;
 }
 
 .bro-text {
+    margin-left: 0.5em;
     font-size: 12pt;
     color: goldenrod;
 }
