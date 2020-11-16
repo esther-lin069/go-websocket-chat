@@ -43,19 +43,34 @@ var myUserBlock = new Vue({
     }
 })
 
+var roomBox = {
+    props:['room'],
+    template:   `<dt>
+                    <button @click="$emit('goroom')" class="mh20 room-box-text room-btn">
+                    <span v-html="inRoom(room.room_id)"></span>
+                    {{ room.room_id }} ({{ room.len }})
+                    </button>
+                </dt>`,
+    methods: {
+        inRoom(room_id) {
+            return (room_id === CHATROOM) ? inRoomSymb : ''
+        }
+    }
+}
+
 //列出聊天室清單 (資料庫結果)
 var roomList = new Vue({
     el: '#roomList',
     data: {
         rooms: ROOMS
     },
+    components :{
+        'room-box':roomBox,
+    },
     methods: {
         goToRoom(room_id) {
             let search = replaceQueryParam('private', 'false', location.search)
             window.location.href = HOST + "/chat/" + room_id + search
-        },
-        inRoom(room_id) {
-            return (room_id === CHATROOM) ? inRoomSymb : ''
         }
     },
     mounted() {

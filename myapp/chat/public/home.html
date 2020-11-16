@@ -60,15 +60,12 @@
                 <dl>
                     <!-- 大廳除外的聊天室列表 -->
                     <dt
+                        is="room-box"
                         v-for="(room, index) in rooms"
                         :room="room"
-                        :id="room.room_id"
                         :key="index"
+                        @goroom="goToRoom(room.room_id)"
                     >
-                        <button @click="goToRoom(room.room_id)" class="mh20 room-box-text room-btn">
-                            <span v-html="inRoom(room.room_id)"></span>
-                            {{ room.room_id }} ({{ room.len }})
-                        </button>
                     </dt>
                 </dl>
             </div>            
