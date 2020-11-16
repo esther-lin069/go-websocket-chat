@@ -111,11 +111,13 @@ body {
 .pchat-btn-w {
     color: white;
     text-align: right;
+    cursor: pointer;
 }
 
 .pchat-btn-r {
     color: rgb(228, 128, 128);
     text-align: right;
+    cursor: pointer;
 }
 
 .room-btn {

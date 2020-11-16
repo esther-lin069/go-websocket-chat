@@ -4,6 +4,7 @@
 <head>
     <title>Go Chat!</title>
     <!-- 字體與icon -->
+    <link rel="icon" href="../asset/favicon.ico" type="image/x-icon" />
     <link rel="shortcut icon" href="#" />
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://pro.fontawesome.com/releases/v5.10.0/css/all.css"
@@ -138,7 +139,7 @@
                             <span :class="member.online != true ? 'user-fa-on' :'user-fa-off'">
                                 <i class="fa fa-user"></i>
                             </span>
-                            <a @click="privateChat(member.username)"
+                            <a title="私聊" @click="privateChat(member.username)"
                                 :class="member.read == '0' ? 'pchat-btn-r' :'pchat-btn-w'" role="button">
                                 <i class="fa fa-comment-dots"></i>
                             </a>
