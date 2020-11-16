@@ -69,18 +69,6 @@ body {
     font-size: 9pt;
 }
 
-.status-h{
-    background-color: #00798F;
-    color: white;
-    border: unset;
-    border-radius: 0.3em;
-    margin-right: 1em;
-    float: right;
-    margin-top: 1em;
-    width: 1em;
-    height: 1em;
-}
-
 .status-a:hover{
     cursor: pointer;
     color: #00798F;
@@ -88,6 +76,28 @@ body {
 
 .status-a:active{
     color: #ddd;
+}
+
+.status-h{
+    background-color: #00798F;
+    color: white;
+    border: unset;
+    border-radius: 0.3em;
+    margin-right: 1em;
+    margin-top: 0.8em;
+    margin-left: 0.2em; 
+    float: right;
+    width: 4em;
+    height: 2em;
+    font-size: 9pt;
+}
+.status-h:hover{
+    cursor: pointer;
+    background-color: #159ab1;
+}
+
+.refresh-text{
+    font-size: 9pt;
 }
 
 .card {

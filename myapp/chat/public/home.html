@@ -142,10 +142,13 @@
                 type="text"
                 class="user-search w3-input w3-border w3-round"
             >
-            <a class="status-h" @click="RefreshRead">
-                <!-- <i class="fa fa-redo-alt"></i> -->
+            <!-- <a class="status-h" @click="RefreshRead">
+                <i class="fa fa-redo-alt"></i>
                 <svg xmlns="http://www.w3.org/2000/svg" width="0.9em" height="0.9em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38"/></svg>
-            </a>
+            </a> -->
+            <button @click="RefreshRead" class="status-h">
+                刷新
+            </button>
             <a class="status-a" @click="setAutoRefresh">自動更新：{{ (auto == true)?'on':'off' }}</a>
             
             <!-- 清單 -->
