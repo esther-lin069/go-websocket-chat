@@ -19,12 +19,13 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/2.1.4/toastr.min.css" rel="stylesheet" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/2.1.4/toastr.min.js"></script>
     <script src="../asset/js/reconnecting-websocket.min.js"></script>
-    
+
     <!-- 自訂css -->
     <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
     <link rel="stylesheet" href="../asset/css/home.css">
 
 </head>
+
 <body>
     <!-- nav bar -->
     <div class="nav">
@@ -35,7 +36,7 @@
     </div>
     <!-- left: room information -->
     <div id="room">
-        <div id="room-title" >
+        <div id="room-title">
             <div class="room-title div-ell">
                 <!-- 聊天室名稱 -->
                 <h1 class="title-text"><span v-html="is_private"></span>{{ title }}</h1>
@@ -47,7 +48,8 @@
             <h5 class="title-text">聊天室列表
                 <button @click="NewRoom" class="new-room-btn">
                     <svg viewBox="0 0 16 16" fill="#00798F" xmlns="http://www.w3.org/2000/svg">
-                        <path fill-rule="evenodd" d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM8.5 4.5a.5.5 0 0 0-1 0v3h-3a.5.5 0 0 0 0 1h3v3a.5.5 0 0 0 1 0v-3h3a.5.5 0 0 0 0-1h-3v-3z"/>
+                        <path fill-rule="evenodd"
+                            d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM8.5 4.5a.5.5 0 0 0-1 0v3h-3a.5.5 0 0 0 0 1h3v3a.5.5 0 0 0 1 0v-3h3a.5.5 0 0 0 0-1h-3v-3z" />
                     </svg>
                 </button>
             </h5>
@@ -56,19 +58,14 @@
         <div id="rooms">
             <!-- 聊天室列表 -->
             <div id="roomList">
-            <button @click="goToRoom('main')" class="mh20 room-box-text room-btn" value="main">大廳</button>
+                <button @click="goToRoom('main')" class="mh20 room-box-text room-btn" value="main">大廳</button>
                 <dl>
                     <!-- 大廳除外的聊天室列表 -->
-                    <dt
-                        is="room-box"
-                        v-for="(room, index) in rooms"
-                        :room="room"
-                        :key="index"
-                        @goroom="goToRoom(room.room_id)"
-                    >
+                    <dt is="room-box" v-for="(room, index) in rooms" :room="room" :key="index"
+                        @goroom="goToRoom(room.room_id)">
                     </dt>
                 </dl>
-            </div>            
+            </div>
         </div>
     </div>
     <!-- center: chat field -->
@@ -87,91 +84,70 @@
     </div>
     <!-- right: member list -->
     <div id="member">
-        <h5 id="switch-all-online" class="title-text">
-            <button 
-                class="list-btn"
-                @click="sOnline" 
-                :style="{ color: toggle == 'online' ?  Colors.activeColor : Colors.inactiveColor}"
-            >在線列表</button>
+        <h5 class="title-text">
+            <button class="list-btn" @click="seen = !seen"
+                :style="{ color: seen ?  Colors.activeColor : Colors.inactiveColor}">在線列表</button>
             <span> |</span>
-            <button 
-                class="list-btn" 
-                @click="sAll" 
-                :style="{ color: toggle == 'all' ?  Colors.activeColor : Colors.inactiveColor }" 
-            >所有使用者</button>
+            <button class="list-btn" @click="seen = !seen"
+                :style="{ color: !seen ?  Colors.activeColor : Colors.inactiveColor }">所有使用者</button>
         </h5>
-        <dl>
-            <dt>
-                <div id="myUserBlock" class="card">
-                    <div class="box">
-                        <span style="color:#f4e868;margin-right:8px;">
-                            <i class="fa fa-user"></i>
-                        </span>
-                        <span class="box-text">{{ username }}</span>
-                    </div>
-                </div>
-            </dt>
-        </dl>
-        <!-- 線上使用者區塊 -->
-        <div v-show="seen" id="online-users">
-            <!-- 清單 -->
-            <dl>
-                <dt 
-                v-for="(member, index) in o_members"
-                :id="member.username"
-                :key="index">
-                    <div class="card">
-                        <div class="box">
-                        <span style="color:#00798F;margin-right:8px;">
-                            <i class="fa fa-user"></i>
-                        </span>
-                        <span class="box-text">{{ member.username }}</span> 
-                        </div>
-                    </div>
-                </dt>
-            </dl>
+
+        <div id="myUserBlock" class="card">
+            <div class="box">
+                <span style="color:#f4e868;margin-right:8px;">
+                    <i class="fa fa-user"></i>
+                </span>
+                <span class="box-text">{{ username }}</span>
+            </div>
         </div>
-        <!-- 所有使用者區塊 -->
-        <div v-show="seen" id="all-users" class="all-users">
-            <label style="margin-left: 10%;">搜尋</label>            
-            <input 
-                v-model="search" 
-                type="text"
-                class="user-search w3-input w3-border w3-round"
-            >
-            <!-- <a class="status-h" @click="RefreshRead">
-                <i class="fa fa-redo-alt"></i>
-                <svg xmlns="http://www.w3.org/2000/svg" width="0.9em" height="0.9em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38"/></svg>
-            </a> -->
-            <button @click="RefreshRead" class="status-h">
-                刷新
-            </button>
-            <a class="status-a" @click="setAutoRefresh">自動更新：{{ (auto == true)?'on':'off' }}</a>
-            
-            <!-- 清單 -->
-            <dl style="margin-top: 2.5em;">
-                <dt 
-                v-for="(member, index) in filterd"
-                :id="member.username"
-                :key="index">
-                    <div class="card">
-                        <div class="box">
-                        <span :class="member.online != true ? 'user-fa-on' :'user-fa-off'">
-                            <i class="fa fa-user"></i>
-                        </span>
-                        <a 
-                            @click="privateChat(member.username)" 
-                            :class="member.read == '0' ? 'pchat-btn-r' :'pchat-btn-w'" 
-                            role="button"
-                        >
-                            <i class="fa fa-comment-dots"></i>
-                        </a>
-                        <span class="box-text">{{ member.username }}</span>
+
+
+        <transition name="slide-fade" mode="out-in">
+            <!-- 線上使用者區塊 -->
+            <div v-if="seen" key="online">
+                <!-- 清單 -->
+                <dl>
+                    <dt v-for="(member, index) in o_members" :id="member.username" :key="index">
+                        <div class="card">
+                            <span style="color:#00798F;margin-right:8px;">
+                                <i class="fa fa-user"></i>
+                            </span>
+                            <span class="box-text">{{ member.username }}</span>
                         </div>
+                    </dt>
+                </dl>
+            </div>
+
+            <!-- 所有使用者區塊 -->
+            <div v-else class="all-users" key="all">
+                <label style="margin-left: 10%;">搜尋</label>
+                <input v-model="search" type="text" class="user-search w3-input w3-border w3-round">
+                <!-- <a class="status-h" @click="RefreshRead">
+                    <i class="fa fa-redo-alt"></i>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="0.9em" height="0.9em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38"/></svg>
+                </a> -->
+                <button @click="RefreshRead" class="status-h">
+                    刷新
+                </button>
+                <a class="status-a" @click="setAutoRefresh">自動更新：{{ (auto == true)?'on':'off' }}</a>
+
+                <!-- 清單 -->
+                <dl style="margin-top: 2.5em;">
+                    <dt v-for="(member, index) in filterd" :id="member.username" :key="index">
+                        <div class="card">
+                            <span :class="member.online != true ? 'user-fa-on' :'user-fa-off'">
+                                <i class="fa fa-user"></i>
+                            </span>
+                            <a @click="privateChat(member.username)"
+                                :class="member.read == '0' ? 'pchat-btn-r' :'pchat-btn-w'" role="button">
+                                <i class="fa fa-comment-dots"></i>
+                            </a>
+                            <span class="box-text">{{ member.username }}</span>
                     </div>
-                </dt>
-            </dl>
-        </div>
+                    </dt>
+                </dl>
+            </div>
+        </transition>
 
 
     </div>
@@ -181,4 +157,6 @@
 
 </body>
 <script src="../asset/js/home_vue.js"></script>
+
+
 </html>

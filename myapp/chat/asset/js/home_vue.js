@@ -87,15 +87,19 @@ var roomList = new Vue({
 
 })
 
-//列出所有使用者
-var allUserList = new Vue({
-    el: '#all-users',
+var memberList = new Vue({
+    el: '#member',
     data: {
         members: MEMBERS,
-        seen: false,
+        o_members: [],
+        seen: true, //預設開啟在線列表
         search: '',
         auto: false,
-        interval: null
+        interval: null,
+        Colors: {
+            activeColor: '#413636',
+            inactiveColor: '#acacac'
+        }
     },
     methods: {
         privateChat(toWho) {
@@ -112,7 +116,10 @@ var allUserList = new Vue({
             this.interval = setInterval(() => {
                 this.RefreshRead()
             }, 3000);
-        }
+        },
+        changeOnline: function (list) {
+            this.o_members = list
+        },
     },
     computed: {
         // 搜尋並返回結果
@@ -146,47 +153,6 @@ var allUserList = new Vue({
             clearInterval(this.interval)
         }
 
-    }
-
-})
-
-//列出在線使用者
-var onlineUserList = new Vue({
-    el: '#online-users',
-    data: {
-        seen: true,
-        o_members: [],
-    },
-    methods: {
-        changeOnline: function (list) {
-            this.o_members = list
-        }
-    }
-})
-
-var switchAllOnline = new Vue({
-    el: '#switch-all-online',
-    data: {
-        toggle: 'online',
-        Colors: {
-            activeColor: '#413636',
-            inactiveColor: '#acacac'
-        }
-
-    },
-    methods: {
-        // 切換按鈕使用狀態與區塊顯示判斷
-        sOnline: function () {
-            onlineUserList.$data.seen = true
-            allUserList.$data.seen = false
-            this.toggle = 'online'
-        },
-        sAll: function () {
-            //allUserList.refreshReadStatus()
-            onlineUserList.$data.seen = false
-            allUserList.$data.seen = true
-            this.toggle = 'all'
-        }
     }
 })
 
@@ -244,7 +210,7 @@ function HandleMessage(message) {
             }
 
             // 更改並列出目前在線名單            
-            onlineUserList.changeOnline(ONLINE)
+            memberList.changeOnline(ONLINE)
 
         }
         // else if (chat.type == "WP") {
@@ -349,7 +315,7 @@ if (PRIVATION == "true" || CHATROOM == "main") {
         roomTitle.$data.title = roomTitle.$data.title.replace(USER, '').replace('-', '')
 
         // 直接顯示所有使用者而非在線列表
-        switchAllOnline.sAll()
+        memberList.$data.seen = false
 
         // 取出收話人
         let members = CHATROOM.split("-")
