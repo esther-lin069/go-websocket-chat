@@ -38,9 +38,9 @@
     <!-- left: room information -->
     <div id="room">
         <div id="room-title">
-            <div class="room-title div-ell">
+            <div class="room-title">
                 <!-- 聊天室名稱 -->
-                <h1 class="title-text"><span v-html="is_private"></span>{{ title }}</h1>
+                <h1 class="title-text div-ell"><span v-html="is_private"></span>{{ title }}</h1>
                 <!-- 刪除聊天室按鈕 -->
                 <button class="exit-btn" v-show="seen_del" @click="DeleteRoom">刪除房間</button>
                 <!-- 離開聊天室按鈕 -->
@@ -94,7 +94,7 @@
         </h5>
 
         <div id="myUserBlock" class="card">
-            <div class="box">
+            <div class="div-ell">
                 <span style="color:#f4e868;margin-right:8px;">
                     <i class="fa fa-user"></i>
                 </span>
@@ -110,10 +110,12 @@
                 <dl>
                     <dt v-for="(member, index) in o_members" :id="member.username" :key="index">
                         <div class="card">
-                            <span style="color:#00798F;margin-right:8px;">
-                                <i class="fa fa-user"></i>
-                            </span>
-                            <span class="box-text">{{ member.username }}</span>
+                            <div class="div-ell">
+                                <span style="color:#00798F;margin-right:8px;">
+                                    <i class="fa fa-user"></i>
+                                </span>
+                                <span class="box-text">{{ member.username }}</span>
+                            </div>
                         </div>
                     </dt>
                 </dl>
@@ -123,10 +125,6 @@
             <div v-else class="all-users" key="all">
                 <label style="margin-left: 10%;">搜尋</label>
                 <input v-model="search" type="text" class="user-search w3-input w3-border w3-round">
-                <!-- <a class="status-h" @click="RefreshRead">
-                    <i class="fa fa-redo-alt"></i>
-                    <svg xmlns="http://www.w3.org/2000/svg" width="0.9em" height="0.9em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38"/></svg>
-                </a> -->
                 <button @click="RefreshRead" class="status-h">
                     刷新
                 </button>
@@ -135,16 +133,18 @@
                 <!-- 清單 -->
                 <dl style="margin-top: 2.5em;">
                     <dt v-for="(member, index) in filterd" :id="member.username" :key="index">
-                        <div class="card">
-                            <span :class="member.online != true ? 'user-fa-on' :'user-fa-off'">
-                                <i class="fa fa-user"></i>
-                            </span>
-                            <a title="私聊" @click="privateChat(member.username)"
-                                :class="member.read == '0' ? 'pchat-btn-r' :'pchat-btn-w'" role="button">
-                                <i class="fa fa-comment-dots"></i>
-                            </a>
-                            <span class="box-text">{{ member.username }}</span>
-                    </div>
+                        <div class="card" :title="member.username">
+                            <div class="div-ell">
+                                <span :class="member.online != true ? 'user-fa-on' :'user-fa-off'">
+                                    <i class="fa fa-user"></i>
+                                </span>
+                                <a title="私聊" @click="privateChat(member.username)"
+                                    :class="member.read == '0' ? 'pchat-btn-r' :'pchat-btn-w'" role="button">
+                                    <i class="fa fa-comment-dots"></i>
+                                </a>
+                                <span class="box-text">{{ member.username }}</span>
+                            </div>
+                        </div>
                     </dt>
                 </dl>
             </div>
