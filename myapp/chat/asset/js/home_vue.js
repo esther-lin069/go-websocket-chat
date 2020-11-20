@@ -286,7 +286,7 @@ var chatForm = new Vue({
     },
     methods: {
         sendMsg: function () {
-            var content = this.msg
+            var content = this.msg.replaceAll('\'','&#39;')
             if (!conn) {
                 return false
             }

@@ -36,7 +36,9 @@ func serveHome(ctx *gin.Context) {
 		}
 
 	}
-	ctx.HTML(http.StatusOK, "home.html", nil)
+	ctx.HTML(http.StatusOK, "index.html", gin.H{
+		"ipAddress": ctx.ClientIP(),
+	})
 }
 
 func login(ctx *gin.Context) {
@@ -144,8 +146,11 @@ func main() {
 	// ROUTER
 	router := gin.Default()
 	router.Delims("{[{", "}]}") //自定義模板隔符避免與Vue衝突
-	router.LoadHTMLFiles("public/home.html", "public/login.html")
-	router.Static("/asset", "./asset")
+	// router.LoadHTMLFiles("public/home.html", "public/login.html")
+	// router.Static("/asset", "./asset")
+
+	router.LoadHTMLFiles("dist/index.html", "public/login.html")
+	router.Static("/assets", "./dist/assets")
 
 	router.POST("/login", login)
 

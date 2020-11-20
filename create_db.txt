@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- 主機： mysql
--- 產生時間： 2020 年 11 月 04 日 09:09
+-- 產生時間： 2020 年 11 月 18 日 08:07
 -- 伺服器版本： 8.0.21
 -- PHP 版本： 7.4.11
 
@@ -32,15 +32,111 @@ CREATE TABLE `msg` (
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- --------------------------------------------------------
+
 --
--- 傾印資料表的資料 `msg`
+-- 資料表結構 `private-rooms`
 --
 
-INSERT INTO `msg` (`id`, `sender`, `recipient`, `room_id`, `type`, `content`, `data_time`, `created_at`) VALUES
-(1, '123', '', 'hello', 'N', 'test', 1604480186113, '2020-11-04 08:57:09'),
-(2, '123', '', 'hello', 'N', 'test', 1604480234337, '2020-11-04 08:57:14'),
-(3, '123', '', 'hello', 'N', 'put', 1604480257994, '2020-11-04 08:57:38'),
-(4, '456', '', 'hello', 'N', 'not put', 1604480262043, '2020-11-04 08:57:42');
+CREATE TABLE `private-rooms` (
+  `id` int NOT NULL,
+  `roomId` varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `create_at` timestamp NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- 傾印資料表的資料 `private-rooms`
+--
+
+INSERT INTO `private-rooms` (`id`, `roomId`, `create_at`) VALUES
+(1, '123-456', '2020-11-11 02:18:57'),
+(2, '123-test', '2020-11-11 02:40:42'),
+(3, '123-hello', '2020-11-11 08:25:44'),
+(4, '456-test', '2020-11-11 08:32:35'),
+(5, '456-hello', '2020-11-11 08:32:39');
+
+-- --------------------------------------------------------
+
+--
+-- 資料表結構 `rooms`
+--
+
+CREATE TABLE `rooms` (
+  `id` int NOT NULL,
+  `roomId` varchar(30) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `create_at` timestamp NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- 傾印資料表的資料 `rooms`
+--
+
+INSERT INTO `rooms` (`id`, `roomId`, `create_at`) VALUES
+(1, 'hell', '2020-10-19 09:17:33'),
+(2, 'hello', '2020-10-19 09:17:37'),
+(16, 'rommm', '2020-10-20 04:33:16'),
+(34, 'room1', '2020-11-17 02:50:46'),
+(35, 'room2', '2020-11-17 02:50:49'),
+(36, 'room3', '2020-11-17 02:50:53'),
+(37, 'room4', '2020-11-17 02:50:56'),
+(38, 'room5', '2020-11-17 02:51:01'),
+(39, 'room6', '2020-11-17 02:51:09'),
+(40, 'room7', '2020-11-17 02:51:13');
+
+-- --------------------------------------------------------
+
+--
+-- 資料表結構 `user-room`
+--
+
+CREATE TABLE `user-room` (
+  `id` int NOT NULL,
+  `user_id` varchar(30) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `room_id` varchar(30) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `create_at` timestamp NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- 傾印資料表的資料 `user-room`
+--
+
+INSERT INTO `user-room` (`id`, `user_id`, `room_id`, `create_at`) VALUES
+(2, 'test', 'hello', '2020-10-19 09:17:37'),
+(10, '123', 'hell', '2020-10-19 09:31:17'),
+(23, 'test', 'hell', '2020-10-20 01:57:09'),
+(28, 'mumi', 'hell', '2020-10-20 04:05:45'),
+(29, '456', 'hell', '2020-10-20 04:07:06'),
+(31, 'test', 'rommm', '2020-10-20 04:33:21'),
+(35, '123', 'hello', '2020-11-02 09:27:58'),
+(36, '456', 'hello', '2020-11-04 08:27:23'),
+(59, '123', 'room1', '2020-11-17 02:50:46'),
+(60, '123', 'room2', '2020-11-17 02:50:49'),
+(61, '123', 'room3', '2020-11-17 02:50:53'),
+(62, '123', 'room4', '2020-11-17 02:50:56'),
+(63, '123', 'room5', '2020-11-17 02:51:01'),
+(64, '123', 'room6', '2020-11-17 02:51:09'),
+(65, '123', 'room7', '2020-11-17 02:51:13'),
+(66, 'test', 'room4', '2020-11-17 02:51:36'),
+(72, 'hello', 'hell', '2020-11-18 03:35:20');
+
+-- --------------------------------------------------------
+
+--
+-- 資料表結構 `users`
+--
+
+CREATE TABLE `users` (
+  `id` int NOT NULL,
+  `username` varchar(30) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `create_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- 傾印資料表的資料 `users`
+--
+
+INSERT INTO `users` (`id`, `username`, `create_at`) VALUES
+(1, '123', '2020-11-18 07:44:19');
 
 --
 -- 已傾印資料表的索引
@@ -53,6 +149,35 @@ ALTER TABLE `msg`
   ADD PRIMARY KEY (`id`);
 
 --
+-- 資料表索引 `private-rooms`
+--
+ALTER TABLE `private-rooms`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `roomId` (`roomId`),
+  ADD KEY `index_roomId` (`roomId`);
+
+--
+-- 資料表索引 `rooms`
+--
+ALTER TABLE `rooms`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `roomId` (`roomId`),
+  ADD KEY `index_roomId` (`roomId`);
+
+--
+-- 資料表索引 `user-room`
+--
+ALTER TABLE `user-room`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `fk_room_users` (`room_id`);
+
+--
+-- 資料表索引 `users`
+--
+ALTER TABLE `users`
+  ADD PRIMARY KEY (`id`);
+
+--
 -- 在傾印的資料表使用自動遞增(AUTO_INCREMENT)
 --
 
@@ -60,5 +185,39 @@ ALTER TABLE `msg`
 -- 使用資料表自動遞增(AUTO_INCREMENT) `msg`
 --
 ALTER TABLE `msg`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT;
+
+--
+-- 使用資料表自動遞增(AUTO_INCREMENT) `private-rooms`
+--
+ALTER TABLE `private-rooms`
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+
+--
+-- 使用資料表自動遞增(AUTO_INCREMENT) `rooms`
+--
+ALTER TABLE `rooms`
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=47;
+
+--
+-- 使用資料表自動遞增(AUTO_INCREMENT) `user-room`
+--
+ALTER TABLE `user-room`
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=75;
+
+--
+-- 使用資料表自動遞增(AUTO_INCREMENT) `users`
+--
+ALTER TABLE `users`
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+
+--
+-- 已傾印資料表的限制式
+--
+
+--
+-- 資料表的限制式 `user-room`
+--
+ALTER TABLE `user-room`
+  ADD CONSTRAINT `fk_room_users` FOREIGN KEY (`room_id`) REFERENCES `rooms` (`roomId`) ON DELETE CASCADE ON UPDATE CASCADE;
 COMMIT;

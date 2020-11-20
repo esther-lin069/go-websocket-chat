@@ -30,10 +30,16 @@
 <body>
     <!-- nav bar -->
     <div class="nav">
-        <span style="color:#FFF;margin-right:8px;">
-            <i class="fa fa-fish"></i>
-        </span>
-        <span>Go chat！</span>
+        <div class="nav-left">
+            <span class="client-info-text">IP: {[{ .ipAddress }]} </span>
+            <span> / browser: </span>
+        </div>
+        <div class="nav-right">
+            <span class="nav-title">
+                <i class="fa fa-fish"></i>
+                <span>Go chat！</span>
+            </span>
+        </div>   
     </div>
     <!-- left: room information -->
     <div id="room">

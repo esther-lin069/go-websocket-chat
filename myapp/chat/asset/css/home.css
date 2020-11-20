@@ -209,22 +209,27 @@ SVG Icons - svgicons.sparkk.fr
 .nav{
     width: 100%;
     height: 50px;
-    padding-top: 5px;
-    padding-bottom: 5px;
-    text-align: center;
-    font-size: 18pt;
-    font-weight: bold;
+    padding: 5px;    
     color: #fff;
     background: #00798F;
     box-shadow:0px 0px 12px 0px rgba(40, 40, 40, 0.5);
-    position: relative;
-    z-index: 100;
 }
 
+.nav-left{
+    width: 20vw;
+    float: left;
+    position: relative;
+    margin: 8px 1em;
+}
+
+.nav-right{
+    width: 55vw;
+    float: right;
+}
 
 #rooms {
     overflow: auto;
-    height: 65vh;
+    height: 60vh;
     width: 100%;
     position: absolute;
     bottom: 15vh;
@@ -345,6 +350,17 @@ SVG Icons - svgicons.sparkk.fr
     font-size: small;
     color: firebrick;
     position: relative;
+}
+
+.nav-title{
+    color: #fff;
+    margin: 0 auto;
+    font-size: 18pt;
+    font-weight: bold;
+}
+
+.client-info-text{
+    color: #fff;
 }
 
 /* 可以设置不同的进入和离开动画 */
