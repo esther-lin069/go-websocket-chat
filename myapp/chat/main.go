@@ -161,7 +161,7 @@ func main() {
 	// router.LoadHTMLFiles("public/home.html", "public/login.html")
 	// router.Static("/asset", "./asset")
 
-	router.LoadHTMLFiles("dist/index.html", "public/login.html", "chat_window/chat_index.html")
+	router.LoadHTMLFiles("dist/index.html", "public/login.html", "chat_window/chat_index.html", "public/test.html")
 	router.Static("/assets", "./dist/assets")
 	router.Static("/chat_assets", "./chat_window/assets")
 
@@ -184,7 +184,7 @@ func main() {
 	router.GET("/login", func(ctx *gin.Context) {
 		ctx.HTML(http.StatusOK, "login.html", nil)
 	})
-	router.GET("/ws/:roomId", func(ctx *gin.Context) {
+	router.GET("/ws/chat/:roomId", func(ctx *gin.Context) {
 		serveWs(hub, ctx)
 	})
 
@@ -197,6 +197,10 @@ func main() {
 	// })
 	router.GET("/dist", func(ctx *gin.Context) {
 		ctx.HTML(http.StatusOK, "chat_index.html", nil)
+	})
+
+	router.GET("/test", func(ctx *gin.Context) {
+		ctx.HTML(http.StatusOK, "test.html", nil)
 	})
 	router.GET("/", serveHome)
 
