@@ -101,6 +101,18 @@ func askRoomList(ctx *gin.Context) {
 
 }
 
+func askFakeList(ctx *gin.Context) {
+	list := []string{
+		"Room1",
+		"Room2",
+		"Room3",
+		"Room4",
+	}
+	ctx.JSON(200, gin.H{
+		"rooms": strings.Join(list, ","),
+	})
+}
+
 func askUserList(hub *Hub, ctx *gin.Context) {
 	list := GetUserList()
 	//online_list := hub.makeInfo("get")
@@ -149,12 +161,14 @@ func main() {
 	// router.LoadHTMLFiles("public/home.html", "public/login.html")
 	// router.Static("/asset", "./asset")
 
-	router.LoadHTMLFiles("dist/index.html", "public/login.html")
+	router.LoadHTMLFiles("dist/index.html", "public/login.html", "chat_window/chat_index.html")
 	router.Static("/assets", "./dist/assets")
+	router.Static("/chat_assets", "./chat_window/assets")
 
 	router.POST("/login", login)
 
 	router.GET("/roomlist", askRoomList)
+	router.GET("/fakelist", askFakeList)
 	router.GET("/userlist", func(ctx *gin.Context) {
 		askUserList(hub, ctx)
 	})
@@ -170,7 +184,7 @@ func main() {
 	router.GET("/login", func(ctx *gin.Context) {
 		ctx.HTML(http.StatusOK, "login.html", nil)
 	})
-	router.GET("/ws/chat/:roomId", func(ctx *gin.Context) {
+	router.GET("/ws/:roomId", func(ctx *gin.Context) {
 		serveWs(hub, ctx)
 	})
 
@@ -181,7 +195,9 @@ func main() {
 	// 		"Users": data[1],
 	// 	})
 	// })
-
+	router.GET("/dist", func(ctx *gin.Context) {
+		ctx.HTML(http.StatusOK, "chat_index.html", nil)
+	})
 	router.GET("/", serveHome)
 
 	router.Run(":8080")
