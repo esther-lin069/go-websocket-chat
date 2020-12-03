@@ -159,7 +159,7 @@ func main() {
 	router := gin.Default()
 	router.Delims("{[{", "}]}") //自定義模板隔符避免與Vue衝突
 	// router.LoadHTMLFiles("public/home.html", "public/login.html")
-	// router.Static("/asset", "./asset")
+	router.Static("/asset", "./asset")
 
 	router.LoadHTMLFiles("dist/index.html", "public/login.html", "chat_window/chat_index.html", "public/test.html")
 	router.Static("/assets", "./dist/assets")
