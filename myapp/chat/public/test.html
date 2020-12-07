@@ -4,34 +4,7 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=0">
-    <script async="" src="https://www.googletagmanager.com/gtm.js?id="></script>
-    <script>(function (w, d, s, l, i) {
-            w[l] = w[l] || []; w[l].push({
-                'gtm.start':
-                    new Date().getTime(), event: 'gtm.js'
-            }); var f = d.getElementsByTagName(s)[0],
-                j = d.createElement(s), dl = l != 'dataLayer' ? '&l=' + l : ''; j.async = true; j.src =
-                    'https://www.googletagmanager.com/gtm.js?id=' + i + dl; f.parentNode.insertBefore(j, f);
-        })
-            (window, document, 'script', 'dataLayer', ``);
-
-        (function (i, s, o, g, r) {
-            i[r] =
-                i[r] ||
-                function () {
-                    (i[r].q = i[r].q || []).push(arguments);
-                };
-            i.addEventListener('DOMContentLoaded', function () {
-                a = s.createElement(o);
-                a.async = 1;
-                a.src = g;
-                a.type = 'text/javascript';
-                s.body.appendChild(a);
-            });
-        })(window, document, 'script', 'https://js.agilenavi.com/na.js', 'na');
-        na('create', 'CY-9AFF58AE', 'XBBSport');
-        na('send', 'pageview', 'pathway');</script>
-    <link rel="icon" href="/223B2D/favicon_soccer.ico" id="favicon">
+    <link rel="icon" href="http://m-dev.xbbsports.asia/223B2D/favicon_soccer.ico" id="favicon">
     <title>sport</title>
     <style>
         body {
@@ -164,8 +137,8 @@
     <link href="/asset/sport/js/chunk-5752acc5.474a26e0.js" rel="prefetch">
 
 
-    <link href="asset/sport/css/chunk-vendors.d0f497ef.css" rel="preload" as="style">
-    <link href="asset/sport/css/index.1183c6af.css" rel="stylesheet">
+    <link href="/asset/sport/css/chunk-vendors.d0f497ef.css" rel="preload" as="style">
+    <link href="/asset/sport/css/index.1183c6af.css" rel="stylesheet">
     <link href="/asset/sport/js/chunk-vendors.2e044ab7.js" rel="preload" as="script">
     <link href="/asset/sport/js/index.490b382a.js" rel="preload" as="script">
     
@@ -1182,7 +1155,7 @@
                             </div>
                         </div>
                         <div data-v-48abf090="" data-v-cdf530ae="" class="right-sidebar white">
-                            <div data-v-48abf090="" class="content-wrap">
+                            <div id="chat_demo" data-v-48abf090="" class="content-wrap">
                                 <div data-v-48abf090="" class="top-area">
                                     <div data-v-48abf090="" class="mem-info">
                                         <div data-v-48abf090="">你好，esthercny</div>
@@ -1199,36 +1172,79 @@
                                             投注教程
                                         </div>
                                     </div>
+                                    
                                     <!---->
-                                    <!---->
-                                    <div data-v-48abf090="" class="streamWrap">
-                                        <div data-v-48abf090="" class="btnWrap">
-                                            <!---->
-                                            <div data-v-48abf090="" class="msgSet">請點選一場比賽觀看現場</div>
-                                            <!---->
-                                            <!---->
+                                    <div class="video-div">
+                                        <!-- 串接直播 -->
+                                        <script src="https://cdn.bootcss.com/flv.js/1.4.2/flv.min.js"></script>
+                                    
+                                        <div class="video-block">
+                                            <video controls id="video"></video>
+                                            <script>
+                                                if (flvjs.isSupported()) {
+                                                    document.querySelector("#load").addEventListener("click", function () {
+                                                        const video = document.getElementById('video');
+                                                        const target = document.querySelector("input").value;
+                                                        const flvPlayer = flvjs.createPlayer({
+                                                            type: 'flv',
+                                                            url: `http://localhost:8000/live/${target}.flv`
+                                                        });
+                                                        flvPlayer.attachMediaElement(video)
+                                                        flvPlayer.load();
+                                                        flvPlayer.play();
+                                                    })
+                                                }
+                                            </script>
                                         </div>
+                                        
                                     </div>
-                                    <div data-v-48abf090="" style="height: 15%;" class="animationWrap">
-                                        <!---->
-                                        <div data-v-48abf090="" class="widget-wrap">
-                                            <!---->
-                                        </div>
-                                        <!---->
-                                    </div>
-                                    <div data-v-48abf090="" class="tab-line">
+                                    <div class="tab-line">
                                         <div data-v-48abf090="" class="tab active">直播賽事</div>
                                     </div>
                                 </div>
                                 <div data-v-48abf090="" class="live-list">
                                     <div data-v-48abf090="" class="no-data-hint">
-                                        暫無資料
+                                        <div>
+                                            <input type="text" v-model="id" />
+                                            <button id="load" @click="Load">Load</button>
+                                        </div>
                                     </div>
                                 </div>
                                 <div style="width: 100%;height:28em;background-color: blanchedalmond;">
-                                    <iframe src="http://localhost:8080/dist?user=123" frameborder="0" style="width: 100%;height: 100%;"></iframe>
+                                    <iframe :src="src" frameborder="0" style="width: 100%;height: 100%;"></iframe>
                                 </div>
                             </div>
+
+                            <script src="https://cdn.jsdelivr.net/npm/vue@2.6.12/dist/vue.js"></script>
+                            <script>
+                                var chat_demo = new Vue({
+                                    el: '#chat_demo',
+                                    data: {
+                                        id: '',
+                                        src: 'http://localhost:8080/dist/hell?user=456'
+                                    },
+                                    methods: {
+                                        Load(){
+                                            this.src = 'http://localhost:8080/dist/'+ this.id +'?user=123'
+                                        }
+                                    },
+                                })
+                            </script>
+                            <style>
+                                .video-div{
+                                    background-color: black;
+                                    height: 25%;
+                                }
+                                .video-block{
+                                    background-color: burlywood;
+                                    height: 80%;
+                                    width: 100%;
+                                }
+                                #video{
+                                    height: 100%;
+                                    width: 100%;
+                                }
+                            </style>
                         </div>
                     </div>
                     <!---->

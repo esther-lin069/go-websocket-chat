@@ -195,7 +195,7 @@ func main() {
 	// 		"Users": data[1],
 	// 	})
 	// })
-	router.GET("/dist", func(ctx *gin.Context) {
+	router.GET("/dist/:room", func(ctx *gin.Context) {
 		ctx.HTML(http.StatusOK, "chat_index.html", nil)
 	})
 
