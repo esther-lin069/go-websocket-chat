@@ -1,13 +1,16 @@
 package main
 
 import (
+	"os"
+
 	"github.com/go-redis/redis"
+	_ "github.com/joho/godotenv/autoload"
 )
 
 /*獲取Redis連線*/
 func GetRedisClient() *redis.Client {
 	return redis.NewClient(&redis.Options{
-		Addr:     "redis:6379",
+		Addr:     os.Getenv("REDIS_ADDR"),
 		Password: "",
 		DB:       0,
 	})
@@ -16,7 +19,7 @@ func GetRedisClient() *redis.Client {
 /*獲取Redis連線*/
 func GetRedisForPrivate() *redis.Client {
 	return redis.NewClient(&redis.Options{
-		Addr:     "redis:6379",
+		Addr:     os.Getenv("REDIS_ADDR"),
 		Password: "",
 		DB:       1,
 	})

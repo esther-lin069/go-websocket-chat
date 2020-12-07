@@ -7,3 +7,7 @@ RUN go get -u github.com/gin-gonic/gin@v1.6.3 \
     && go get github.com/go-sql-driver/mysql@v1.5.0 \
     && go get github.com/go-redis/redis/v8@v8.3.0 \
     && go get github.com/joho/godotenv
+
+WORKDIR /go
+COPY up.sh .
+CMD ["sh","up.sh"]
