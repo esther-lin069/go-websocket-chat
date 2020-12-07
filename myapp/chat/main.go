@@ -149,6 +149,7 @@ func readStatus(ctx *gin.Context) {
 }
 
 func main() {
+
 	hub := newHub()
 	db = InitDB()
 	defer db.Close()
@@ -188,13 +189,6 @@ func main() {
 		serveWs(hub, ctx)
 	})
 
-	// router.GET("/info", func(ctx *gin.Context) {
-	// 	data := hub.makeInfo("get")
-	// 	ctx.JSON(200, gin.H{
-	// 		"Rooms": data[0],
-	// 		"Users": data[1],
-	// 	})
-	// })
 	router.GET("/dist/:room", func(ctx *gin.Context) {
 		ctx.HTML(http.StatusOK, "chat_index.html", nil)
 	})

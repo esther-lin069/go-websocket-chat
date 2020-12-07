@@ -3,19 +3,21 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"os"
 	"strings"
 
 	"database/sql"
 
 	"github.com/go-redis/redis"
 	_ "github.com/go-sql-driver/mysql"
+	_ "github.com/joho/godotenv/autoload"
 )
 
-const (
-	host     = "mysql"
-	database = "go_chat"
-	user     = "root"
-	password = "root"
+var (
+	host     = os.Getenv("MYSQL_HOST")
+	database = os.Getenv("MYSQL_DB")
+	user     = os.Getenv("MYSQL_USER")
+	password = os.Getenv("MYSQL_PASW")
 )
 
 var db *sql.DB
