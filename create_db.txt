@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- 主機： mysql
--- 產生時間： 2020 年 11 月 18 日 08:07
+-- 產生時間： 2020 年 12 月 08 日 07:33
 -- 伺服器版本： 8.0.21
 -- PHP 版本： 7.4.11
 
@@ -44,13 +44,6 @@ CREATE TABLE `private-rooms` (
   `create_at` timestamp NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
---
--- 傾印資料表的資料 `private-rooms`
---
-
-INSERT INTO `private-rooms` (`id`, `roomId`, `create_at`) VALUES
-(1, '123-456', '2020-11-11 02:18:57'),
-
 -- --------------------------------------------------------
 
 --
@@ -68,8 +61,20 @@ CREATE TABLE `rooms` (
 --
 
 INSERT INTO `rooms` (`id`, `roomId`, `create_at`) VALUES
-(1, 'main', '2020-10-19 09:17:33'),
-(2, 'hell', '2020-10-19 09:17:37'),
+(1, 'hell', '2020-10-19 09:17:33'),
+(2, 'hello', '2020-10-19 09:17:37'),
+(16, 'rommm', '2020-10-20 04:33:16'),
+(34, 'room1', '2020-11-17 02:50:46'),
+(36, 'room3', '2020-11-17 02:50:53'),
+(37, 'room4', '2020-11-17 02:50:56'),
+(38, 'room5', '2020-11-17 02:51:01'),
+(39, 'room6', '2020-11-17 02:51:09'),
+(40, 'room7', '2020-11-17 02:51:13'),
+(47, 'wef', '2020-11-23 03:31:37'),
+(48, 'room2', '2020-11-23 03:44:09'),
+(51, 'test', '2020-11-24 07:31:00'),
+(52, 'demo01', '2020-12-08 06:36:34'),
+(53, 'demo02', '2020-12-08 06:36:44');
 
 -- --------------------------------------------------------
 
@@ -89,7 +94,10 @@ CREATE TABLE `user-room` (
 --
 
 INSERT INTO `user-room` (`id`, `user_id`, `room_id`, `create_at`) VALUES
-(1, '123', 'main', '2020-10-19 09:17:37');
+(1, '123', 'demo01', '2020-12-08 06:36:34'),
+(2, '123', 'demo02', '2020-12-08 06:36:44'),
+(3, '456', 'demo01', '2020-12-08 06:36:55'),
+(4, '456', 'demo02', '2020-12-08 06:37:00');
 
 -- --------------------------------------------------------
 
@@ -109,7 +117,9 @@ CREATE TABLE `users` (
 
 INSERT INTO `users` (`id`, `username`, `create_at`) VALUES
 (1, '123', '2020-11-18 07:44:19'),
-(2, '456', '2020-11-18 07:44:20');
+(2, '456', '2020-11-23 02:32:56'),
+(3, 'test', '2020-11-23 02:35:37'),
+(4, '234', '2020-12-02 06:56:44');
 
 --
 -- 已傾印資料表的索引
@@ -164,25 +174,25 @@ ALTER TABLE `msg`
 -- 使用資料表自動遞增(AUTO_INCREMENT) `private-rooms`
 --
 ALTER TABLE `private-rooms`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT;
 
 --
 -- 使用資料表自動遞增(AUTO_INCREMENT) `rooms`
 --
 ALTER TABLE `rooms`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=47;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=54;
 
 --
 -- 使用資料表自動遞增(AUTO_INCREMENT) `user-room`
 --
 ALTER TABLE `user-room`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=75;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=86;
 
 --
 -- 使用資料表自動遞增(AUTO_INCREMENT) `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- 已傾印資料表的限制式
