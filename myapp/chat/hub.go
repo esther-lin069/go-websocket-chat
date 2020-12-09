@@ -20,7 +20,7 @@ type Hub struct {
 	clients map[*Client]bool
 
 	// Inbound messages from the clients.
-	broadcast chan []byte
+	broadcast chan Message
 
 	loadmsg chan *Client
 
@@ -42,7 +42,7 @@ type SysMsg struct {
 func newHub() *Hub {
 	return &Hub{
 		rooms:      make(map[string]map[string]*Client),
-		broadcast:  make(chan []byte),
+		broadcast:  make(chan Message),
 		loadmsg:    make(chan *Client),
 		register:   make(chan *Client),
 		unregister: make(chan *Client),
@@ -100,7 +100,7 @@ func (h *Hub) run() {
 			/*製作系統提示(訊息＋人員名單)*/
 			sysmsg := client.id + " 進入 " + client.roomId + " 聊天室!"
 			data, _ := json.Marshal(&SysMsg{Text: sysmsg, RoomInfo: client.roomId, UserInfo: strings.Join(roomstate, ",")})
-			message, _ := json.Marshal(&Message{Sender: "SYS", RoomId: client.roomId, Type: "H", Content: string(data), Time: 0})
+			message, _ := json.Marshal(&Content{Sender: "SYS", Type: "H", Content: string(data), Time: 0})
 
 			/*發送至該聊天室*/
 			for _, con := range conns {
@@ -145,7 +145,7 @@ func (h *Hub) run() {
 					/*製作系統提示(訊息＋人員名單)*/
 					sysmsg := cleave + " 離開 " + client.roomId + " 聊天室!"
 					data, _ := json.Marshal(&SysMsg{Text: sysmsg, RoomInfo: client.roomId, UserInfo: strings.Join(roomstate, ",")})
-					message, _ := json.Marshal(&Message{Sender: "SYS", RoomId: client.roomId, Type: "H", Content: string(data), Time: 0})
+					message, _ := json.Marshal(&Content{Sender: "SYS", Type: "H", Content: string(data), Time: 0})
 
 					/*發送至該聊天室*/
 					for _, con := range conns {
@@ -157,44 +157,35 @@ func (h *Hub) run() {
 		* 跨聊天室廣播
 		* 一般訊息發送
 		 */
-		case message := <-h.broadcast:
-			var msg Message
-			err := json.Unmarshal(message, &msg) //轉換出使用者發的訊息內容
+		case m := <-h.broadcast:
+			var data Content
+			err := json.Unmarshal(m.content, &data) //轉換出使用者發的訊息內容
 			if err != nil {
 				fmt.Print(err)
-				fmt.Println(message)
+				fmt.Println(m)
 			}
 
 			/*如果是廣播訊息，則發送至全頻道後跳轉回迴圈頂端*/
-			if msg.Type == "A" {
-				h.sys(message)
+			if data.Type == "A" {
+				h.sys(m.content)
 				break FOR
 			}
 
 			//如果是私訊 通知該使用者
-			if msg.Type == "P" {
-				// message, _ := json.Marshal(&Message{Sender: "SYS", RoomId: "", Type: "WP", Content: msg.Sender, Time: 0})
-				// 因為不確定要通知的人在哪個房間，所以得遍歷
-				// 這個做法不好 可以改redis
-				// for _, con := range h.rooms {
-				// 	if c, ok := con[msg.Recipient]; ok {
-				// 		c.send <- message
-				// 	}
-				// }
-
+			if data.Type == "P" {
 				// redis存放已讀標記資訊
-				HsetForPrivate(msg.Recipient, msg.Sender, "0")
+				HsetForPrivate(data.Recipient, data.Sender, "0")
 
 			}
 
-			conns := h.rooms[msg.RoomId]
+			conns := h.rooms[m.client.roomId]
 			/*一般訊息只發送到該聊天室*/
 			for _, con := range conns {
 				select {
-				case con.send <- message:
+				case con.send <- m.content:
 				default:
 					close(con.send)
-					delete(h.rooms, msg.RoomId)
+					delete(h.rooms, m.client.roomId)
 				}
 			}
 
@@ -230,7 +221,7 @@ func (h *Hub) makeInfo(typeof string) map[string]string {
 
 	if typeof == "send" {
 		data, _ := json.Marshal(&SysMsg{Text: "", RoomInfo: info[0], UserInfo: info[1]})
-		message, _ := json.Marshal(&Message{Sender: "SYS", RoomId: "", Type: "A", Content: string(data), Time: 0})
+		message, _ := json.Marshal(&Content{Sender: "SYS", Type: "A", Content: string(data), Time: 0})
 		h.sys(message)
 
 	}
@@ -258,7 +249,7 @@ func (h *Hub) sysTicker() {
 	defer ticker.Stop()
 	for {
 		<-ticker.C
-		message, _ := json.Marshal(&Message{Sender: "系統", RoomId: "", Type: "A", Content: "在這裡，每300秒就有五分鐘過去，珍惜眼睛，看看窗外", Time: time.Now().Unix() * 1000})
+		message, _ := json.Marshal(&Content{Sender: "系統", Type: "A", Content: "在這裡，每300秒就有五分鐘過去，珍惜眼睛，看看窗外", Time: time.Now().Unix() * 1000})
 		h.sys(message)
 	}
 

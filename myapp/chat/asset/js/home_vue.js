@@ -282,7 +282,8 @@ var chatForm = new Vue({
     el: '#form',
     data: {
         msg: '',
-        type: 'N'
+        type: 'N',
+        recipient: CHATROOM
     },
     methods: {
         sendMsg: function () {
@@ -295,8 +296,9 @@ var chatForm = new Vue({
             }
             if (PRIVATION == "true") {
                 this.type = "P"
+                this.recipient = RECIPIENT
             }
-            jstr = JSON.stringify({ sender: USER, roomId: CHATROOM, recipient: RECIPIENT, type: this.type, content: content, time: Date.now() });
+            jstr = JSON.stringify({ sender: USER, recipient: this.recipient, type: this.type, content: content, time: Date.now() });
             conn.send(jstr)
 
             return false
@@ -490,6 +492,7 @@ function getReadStatus(user) {
         url: "/readstatus/" + user,
     }).then((e) => {
         var obj = JSON.parse(e.data.readstatus)
+        console.log(obj)
         // 接收到未讀標記，更改名單內容
         for (member of MEMBERS) {
             if (Object.keys(obj).includes(member.username)) {

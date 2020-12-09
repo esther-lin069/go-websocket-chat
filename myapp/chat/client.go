@@ -47,9 +47,13 @@ P/private:私訊
 WP/私訊通知
 */
 type Message struct {
+	client  *Client
+	content []byte
+}
+
+type Content struct {
 	Sender    string `json:"sender"`
 	Recipient string `json:"recipient"`
-	RoomId    string `json:"roomId"`
 	Type      string `json:"type"`
 	Content   string `json:"content"`
 	Time      int64  `json:"time"`
@@ -65,6 +69,9 @@ type RedisMsg struct {
 type Client struct {
 	//id string
 	id string
+
+	// 1:default user, 2:streamer, 3:trader
+	accountType int
 
 	roomId string
 
@@ -119,7 +126,7 @@ func (c *Client) readPump() {
 		/*存入Mysql*/
 		PutMsgSingle(message)
 
-		c.hub.broadcast <- message
+		c.hub.broadcast <- Message{client: c, content: message}
 	}
 }
 
@@ -178,7 +185,7 @@ func serveWs(hub *Hub, ctx *gin.Context) {
 
 	fmt.Println("user:" + username + "/ room:" + room + " .registered type:" + roomType)
 
-	client := &Client{id: username, roomId: room, roomType: roomType, hub: hub, redis_conn: GetRedisClient(), conn: conn, send: make(chan []byte, 256)}
+	client := &Client{id: username, accountType: 1, roomId: room, roomType: roomType, hub: hub, redis_conn: GetRedisClient(), conn: conn, send: make(chan []byte, 256)}
 	client.hub.loadmsg <- client
 	client.hub.register <- client
 

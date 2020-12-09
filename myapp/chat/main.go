@@ -36,7 +36,7 @@ func serveHome(ctx *gin.Context) {
 		}
 
 	}
-	ctx.HTML(http.StatusOK, "index.html", gin.H{
+	ctx.HTML(http.StatusOK, "home.html", gin.H{
 		"ipAddress": ctx.ClientIP(),
 	})
 }
@@ -162,7 +162,7 @@ func main() {
 	// router.LoadHTMLFiles("public/home.html", "public/login.html")
 	router.Static("/asset", "./asset")
 
-	router.LoadHTMLFiles("dist/index.html", "public/login.html", "chat_window/chat_index.html", "public/test.html")
+	router.LoadHTMLFiles("public/home.html", "dist/index.html", "public/login.html", "chat_window/chat_index.html", "public/test.html")
 	router.Static("/assets", "./dist/assets")
 	router.Static("/chat_assets", "./chat_window/assets")
 
