@@ -36,7 +36,7 @@ func serveHome(ctx *gin.Context) {
 		}
 
 	}
-	ctx.HTML(http.StatusOK, "home.html", gin.H{
+	ctx.HTML(http.StatusOK, "index.html", gin.H{
 		"ipAddress": ctx.ClientIP(),
 	})
 }
