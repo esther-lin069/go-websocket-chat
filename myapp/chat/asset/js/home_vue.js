@@ -3,6 +3,7 @@ var ROOMS = []      //該使用者的聊天室名單
 var MEMBERS = []    //所有使用者名單
 var ONLINE = []
 var RECIPIENT = ''  //私聊接收者
+var accountType = 1
 
 //取得聊天室ＩＤ	
 var url = new URL(location.href)
@@ -158,7 +159,8 @@ var memberList = new Vue({
 
 /*ws*/
 var conn;
-var log = document.getElementById("log");
+var n_log = document.getElementById("log");
+var p_log = document.getElementById("plog");
 var inRoomSymb = `<i class="fas fa-fish" style="margin-right:0.5em;color:#00798F"></i>`;
 
 //WS連線：接收廣播訊息
@@ -252,6 +254,20 @@ function HandleMessage(message) {
         //判別內容是否包含鏈結
         var text = isUrl(chat.content)
 
+        if(chat.type === 'trade-stream'){
+            item.innerHTML = `<div class="chat-text">\
+                    <label class="sm-text"><span class="b-text">` + chat.sender + `</span> -` + chatTime + `</lable><br>\
+                    <label class="bro-text">` + text + `</label>\
+                </div>`
+            
+            n_log.appendChild(item)
+            console.log(p_log)
+            return
+
+        }
+
+        
+
         //來自其他用戶或使用者的廣播消息
         if (chat.type == "A") {
 
@@ -274,7 +290,7 @@ function HandleMessage(message) {
         }
     }
     //打印訊息            
-    appendLog(item);
+    appendLog(item, n_log);
 
 }
 
@@ -299,6 +315,29 @@ var chatForm = new Vue({
                 this.recipient = RECIPIENT
             }
             jstr = JSON.stringify({ sender: USER, recipient: this.recipient, type: this.type, content: content, time: Date.now() });
+            conn.send(jstr)
+
+            return false
+        },
+    }
+})
+
+var streamBlock = new Vue({
+    el: '#stream',
+    data: {
+        p_msg: '',
+        type: 'trade-stream',
+    },
+    methods: {
+        send_p_msg: function(){
+            var content = this.p_msg.replaceAll('\'','&#39;')
+            if (!conn) {
+                return false
+            }
+            if (this.p_msg = '') {
+                return false
+            }
+            jstr = JSON.stringify({ sender: USER, recipient: CHATROOM, type: this.type, content: content, time: Date.now() });
             conn.send(jstr)
 
             return false
@@ -351,7 +390,7 @@ function isUrl(v) {
 }
 
 //將聊天訊息放入聊天區塊
-function appendLog(item) {
+function appendLog(item, log) {
     var doScroll = log.scrollTop > log.scrollHeight - log.clientHeight - 1;
     log.appendChild(item);
 
@@ -359,28 +398,6 @@ function appendLog(item) {
         log.scrollTop = log.scrollHeight - log.clientHeight;
     }
 }
-
-//私訊通知＿toastr通知設定
-// function showToastr(id){
-//     toastr.options = {
-//         "closeButton": false,
-//         "debug": false,
-//         "newestOnTop": false,
-//         "progressBar": false,
-//         "positionClass": "toast-bottom-right",
-//         "preventDuplicates": false,
-//         "onclick": null,
-//         "showDuration": "300",
-//         "hideDuration": "1000",
-//         "timeOut": "3000",
-//         "extendedTimeOut": "1000",
-//         "showEasing": "swing",
-//         "hideEasing": "linear",
-//         "showMethod": "fadeIn",
-//         "hideMethod": "fadeOut"
-//     }
-//     toastr["info"]("您有來自"+id+"的私訊", "通知");
-// }
 
 /*房間操作 (ajax)*/
 

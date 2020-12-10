@@ -237,8 +237,9 @@ SVG Icons - svgicons.sparkk.fr
 
 #chat {
     height: 100vh;
-    width: 70%;
+    width: 40%;
     margin: 0px auto;
+    float: left;
 }
 
 #room {
@@ -251,10 +252,17 @@ SVG Icons - svgicons.sparkk.fr
 #member {
     overflow: auto;
     height: 100vh;
-    width: 15%;
+    width: 10%;
     position: absolute;
     top: 50px;
-    right: 0px;
+    right: 35%;
+}
+
+#stream {
+    background-color: #83bac4;
+    width: 35%;
+    height: 100vh;
+    float: right;
 }
 
 #log {
@@ -263,6 +271,39 @@ SVG Icons - svgicons.sparkk.fr
     height: 85vh;
     margin-top: 0;
     padding: 0.5em 2em 0.5em 2em;
+}
+
+/* ==== */
+
+#videoBlock {
+    background-color: #3e3e3e;
+    width: 95%;
+    height: 40%;
+    margin: 10px auto;
+}
+
+#chatPrivate{
+    width: 95%;
+    height: 40%;
+    margin: 3em auto;
+    position: relative;
+    
+}
+
+#plog {
+    background-color: #dfdfdf;
+    height: 80%;
+    overflow: auto;
+    padding: 0.5em;
+    border-radius: .3em
+}
+
+#p_input {
+    margin-top: .5em;
+}
+
+#p_input input{
+    width: 70%;
 }
 
 /* form */
@@ -274,7 +315,7 @@ SVG Icons - svgicons.sparkk.fr
 }
 
 .form-inline input {
-    width: 80%;
+    width: 70%;
     vertical-align: middle;
     margin: 5px 10px 5px 0;
     padding: 10px;
